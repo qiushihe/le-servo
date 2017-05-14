@@ -1,10 +1,10 @@
 var path = require("path");
+var glob = require("glob");
 
 module.exports = {
   entry: {
-    bundle: [
-      "./src"
-    ]
+    server: ["./src"],
+    test: glob.sync("./test/**/*.js")
   },
   resolve: {
     extensions: [".js"],
@@ -13,12 +13,17 @@ module.exports = {
       "node_modules"
     ]
   },
+  module: {
+    loaders: [{
+      test: /\.js?$/,
+      exclude: /node_modules/,
+      loaders: "babel-loader"
+    }]
+  },
   output: {
     path: path.resolve(__dirname, "lib"),
     filename: "[name].js",
     chunkFilename: "[id].js"
   },
-  node: {
-    __dirname: false
-  }
+  target: "node"
 };

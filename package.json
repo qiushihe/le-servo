@@ -2,10 +2,12 @@
   "name": "le-servo",
   "version": "0.0.1",
   "description": "Simple Let's Encrypt Server",
-  "main": "lib/bundle.js",
+  "main": "lib/server.js",
   "scripts": {
     "build": "./node_modules/.bin/webpack --config webpack.config.js",
-    "server": "node ./lib/bundle.js"
+    "server": "node ./lib/server.js",
+    "test": "npm run build && ./node_modules/mocha/bin/mocha lib/test.js",
+    "dev": "npm run build && npm run server"
   },
   "repository": "https://github.com/qiushihe/le-servo",
   "author": "Billy He",
@@ -18,10 +20,13 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-es2015": "^6.24.0",
     "babel-preset-react": "^6.23.0",
+    "glob": "^7.1.1",
+    "mocha": "^3.3.0",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.1"
   },
   "dependencies": {
+    "express": "^4.15.2",
     "lodash": "^4.17.4"
   }
 }
