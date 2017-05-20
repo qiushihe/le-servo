@@ -71,6 +71,7 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
+          expect(err.message).to.equal("Invalid header: Key not found for provided kid");
         });
     }));
 
@@ -87,6 +88,7 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
+          expect(err.message).to.equal("Invalid header: Can not have both kid and jwk");
         });
     }));
 
@@ -103,6 +105,7 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
+          expect(err.message).to.equal("Invalid header: Missing either kid or jwk");
         });
     }));
 
@@ -119,6 +122,7 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
+          expect(err.message).to.equal("Invalid header: Must have alg, nonce and url");
         });
     }));
   });
