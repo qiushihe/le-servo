@@ -1,5 +1,5 @@
-export const promiseIt = (description, test) => {
-  it(description, (done) => {
-    test().then(done).catch(done);
-  });
+import Promise from "bluebird";
+
+export const async = (test) => (done) => {
+  Promise.resolve().then(test).then(done).catch(done);
 };

@@ -5,7 +5,7 @@ import Promise from "bluebird";
 
 import JoseService from "services/jose.service";
 
-import {promiseIt} from "../test-helpers";
+import {async} from "../test-helpers";
 
 const createSign = (fields, key, {hasJwk, hasKid}) => {
   if (hasJwk && hasKid) {
@@ -63,8 +63,8 @@ describe("JoseService", () => {
       promisedKey = keystore.generate("EC", "P-256");
     });
 
-    promiseIt("should verify header and payload for new key", () => (
-      promisedKey
+    it("should verify header and payload for new key", async(() => {
+      return promisedKey
         .then(sign(header, payload, {hasJwk: true, hasKid: false}))
         .then((jws) => service.verify(jws))
         .then(({payload: verifiedPayload, header: verifiedHeader}) => {
@@ -72,11 +72,11 @@ describe("JoseService", () => {
           expect(verifiedNonce).to.equal(header.nonce);
           expect(verifiedUrl).to.equal(header.url);
           expect(verifiedPayload).to.deep.equal(payload);
-        })
-    ));
+        });
+    }));
 
-    promiseIt("should verify header and payload for existing key", () => (
-      promisedKey
+    it("should verify header and payload for existing key", async(() => {
+      return promisedKey
         .then((key) => {
           service.keystore.add(key);
           return key;
@@ -88,11 +88,11 @@ describe("JoseService", () => {
           expect(verifiedNonce).to.equal(header.nonce);
           expect(verifiedUrl).to.equal(header.url);
           expect(verifiedPayload).to.deep.equal(payload);
-        })
-    ));
+        });
+    }));
 
-    promiseIt("should not accept header with invalid kid", () => (
-      promisedKey
+    it("should not accept header with invalid kid", async(() => {
+      return promisedKey
         .then(sign(header, payload, {hasJwk: false, hasKid: true}))
         .then((jws) => service.verify(jws))
         .then(() => {
@@ -104,11 +104,11 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
-        })
-    ));
+        });
+    }));
 
-    promiseIt("should not accept header with both jwk and kid", () => (
-      promisedKey
+    it("should not accept header with both jwk and kid", async(() => {
+      return promisedKey
         .then(sign(header, payload, {hasJwk: true, hasKid: true}))
         .then((jws) => service.verify(jws))
         .then(() => {
@@ -120,11 +120,11 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
-        })
-    ));
+        });
+    }));
 
-    promiseIt("should not accept header with neither jwk nor kid", () => (
-      promisedKey
+    it("should not accept header with neither jwk nor kid", async(() => {
+      return promisedKey
         .then(sign(header, payload, {hasJwk: false, hasKid: false}))
         .then((jws) => service.verify(jws))
         .then(() => {
@@ -136,11 +136,11 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
-        })
-    ));
+        });
+    }));
 
-    promiseIt("should not accept header with missing fields", () => (
-      promisedKey
+    it("should not accept header with missing fields", async(() => {
+      return promisedKey
         .then(sign({}, payload, {hasJwk: true, hasKid: false}))
         .then((jws) => service.verify(jws))
         .then(() => {
@@ -152,7 +152,7 @@ describe("JoseService", () => {
           if (err._rethrow) {
             throw err;
           }
-        })
-    ));
+        });
+    }));
   });
 });
