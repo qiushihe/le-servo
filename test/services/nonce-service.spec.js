@@ -5,7 +5,7 @@ import uuidV4 from "uuid/v4";
 import NonceService from "services/nonce.service";
 import {isValid} from "helpers/nonce.helper";
 
-import {promiseIt} from "../test-helpers";
+import {async} from "../test-helpers";
 
 describe("NonceService", () => {
   let service;
@@ -19,23 +19,23 @@ describe("NonceService", () => {
       expect(service.getNonce()).to.be.an.instanceof(Promise);
     });
 
-    promiseIt("should not resolve to null value", () => (
-      service.getNonce().then((nonce) => {
+    it("should not resolve to null value", async(() => {
+      return service.getNonce().then((nonce) => {
         expect(nonce).to.not.be.null;
-      })
-    ));
+      });
+    }));
 
-    promiseIt("should not resolve to empty value", () => (
-      service.getNonce().then((nonce) => {
+    it("should not resolve to empty value", async(() => {
+      return service.getNonce().then((nonce) => {
         expect(nonce.length).to.be.above(0);
-      })
-    ));
+      });
+    }));
 
-    promiseIt("should resolve to valid nonce", () => (
-      service.getNonce().then((nonce) => {
+    it("should resolve to valid nonce", async(() => {
+      return service.getNonce().then((nonce) => {
         expect(isValid(nonce)).to.be.true;
-      })
-    ));
+      });
+    }));
   });
 
   describe("#useNonce()", () => {
@@ -49,18 +49,18 @@ describe("NonceService", () => {
       expect(service.useNonce(nonce)).to.be.an.instanceof(Promise);
     });
 
-    promiseIt("should accept valid nonce", () => (
-      service.useNonce(nonce).catch(() => {
+    it("should accept valid nonce", async(() => {
+      return service.useNonce(nonce).catch(() => {
         throw new Error("Valid nonce should not be rejected");
-      })
-    ));
+      });
+    }));
 
-    promiseIt("should not accept used nonce", () => (
-      service.useNonce(nonce).then(
+    it("should not accept used nonce", async(() => {
+      return service.useNonce(nonce).then(
         () => service.useNonce(nonce)
       ).then(() => {
         throw new Error("Used nonce should not be accepted");
-      })
-    ));
+      });
+    }));
   });
 });
