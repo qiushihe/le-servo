@@ -5,43 +5,10 @@ import Promise from "bluebird";
 
 import JoseService from "services/jose.service";
 
-import {async} from "../test-helpers";
-
-const createSign = (fields, key, {hasJwk, hasKid}) => {
-  if (hasJwk && hasKid) {
-    return JWS.createSign(
-      {format: "flattened", fields: {...fields, jwk: key.toJSON()}},
-      {reference: "kid", key}
-    );
-  }
-
-  if (hasJwk && !hasKid) {
-    return JWS.createSign(
-      {format: "flattened", fields: {...fields, jwk: key.toJSON()}},
-      {reference: null, key}
-    );
-  }
-
-  if (!hasJwk && hasKid) {
-    return JWS.createSign(
-      {format: "flattened", fields: {...fields}},
-      {reference: "kid", key}
-    );
-  }
-
-  if (!hasJwk && !hasKid) {
-    return JWS.createSign(
-      {format: "flattened", fields: {...fields}},
-      {reference: null, key}
-    );
-  }
-};
-
-const sign = (header, payload, {hasJwk, hasKid}) => (key) => {
-  return createSign(header, key, {hasJwk, hasKid})
-    .update(JSON.stringify(payload))
-    .final();
-};
+import {
+  async,
+  signWithJws as sign
+} from "../test-helpers";
 
 describe("JoseService", () => {
   let service;
