@@ -5,10 +5,8 @@ import Promise from "bluebird";
 
 import JoseService from "services/jose.service";
 
-import {
-  async,
-  signWithJws as sign
-} from "../test-helpers";
+import {async} from "../helpers/test.helper";
+import {signWithJws as sign} from "../helpers/jws.helper";
 
 describe("JoseService", () => {
   let service;

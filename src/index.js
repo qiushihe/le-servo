@@ -1,21 +1,19 @@
 import express from "express";
-import flow from "lodash/fp/flow";
+import bodyParser from "body-parser";
 
 import newNonce from "filters/new-nonce.filter";
+import jose from "filters/jose.filter";
 import hallo from "handlers/hallo.handler";
 
 const port = 3000;
+const server = express();
 
-const filters = [
-  newNonce
-];
+server.use(bodyParser.json());
+server.use(newNonce);
+server.use(jose);
 
-const handlers = [
-  hallo
-];
+server.all("/*", hallo);
 
-const listener = (server) => server.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
-
-flow([...filters, ...handlers, listener])(express());

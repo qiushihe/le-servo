@@ -5,7 +5,7 @@ import uuidV4 from "uuid/v4";
 import NonceService from "services/nonce.service";
 import {isValid} from "helpers/nonce.helper";
 
-import {async} from "../test-helpers";
+import {async} from "../helpers/test.helper";
 
 describe("NonceService", () => {
   let service;
