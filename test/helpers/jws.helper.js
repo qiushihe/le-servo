@@ -1,13 +1,4 @@
-import Promise from "bluebird";
 import {JWS} from "node-jose";
-
-// Async test =====================================================================================
-
-export const async = (test) => (done) => {
-  Promise.resolve().then(test).then(done).catch(done);
-};
-
-// JWS Signing ====================================================================================
 
 export const createJwsSign = (fields, key, {hasJwk, hasKid}) => {
   if (hasJwk && hasKid) {
