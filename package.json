@@ -23,6 +23,8 @@
     "chai": "^3.5.0",
     "glob": "^7.1.1",
     "mocha": "^3.3.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.1"
   },
