@@ -62,7 +62,6 @@ describe("JoseFilter", () => {
         request({
           uri: `http://localhost:${port}/lala`,
           method: "POST",
-          resolveWithFullResponse: true,
           json: true,
           body: jws
         }).then(function () {
@@ -84,7 +83,6 @@ describe("JoseFilter", () => {
         request({
           uri: `http://localhost:${port}/lala`,
           method: "POST",
-          resolveWithFullResponse: true,
           json: true,
           body: {something: "else"}
         }).then(function () {

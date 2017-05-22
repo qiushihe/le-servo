@@ -25,7 +25,6 @@ export default (req, _, next) => {
             verifiedNonce: header.nonce
           }
         };
-        req.test = 42;
         req.body = payload;
         next();
       });

@@ -43,8 +43,7 @@ describe("NonceFilter", () => {
     serverReady.then(() => (
       request({
         uri: `http://localhost:${port}/lala`,
-        method: "GET",
-        resolveWithFullResponse: true
+        method: "GET"
       }).then(function () {
         expect(handler).to.have.been.calledOnce;
         expect(handler.getCall(0).args[1].getHeader("replay-nonce")).to.be.ok
@@ -58,7 +57,6 @@ describe("NonceFilter", () => {
       request({
         uri: `http://localhost:${port}/lala`,
         method: "POST",
-        resolveWithFullResponse: true,
         body: "LALA"
       }).then(function () {
         expect(handler).to.have.been.calledOnce;
@@ -73,7 +71,6 @@ describe("NonceFilter", () => {
       request({
         uri: `http://localhost:${port}/lala`,
         method: "PUT",
-        resolveWithFullResponse: true,
         body: "LALA"
       }).then(function () {
         expect(handler).to.have.been.calledOnce;
