@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 
 import newNonce from "filters/new-nonce.filter";
 import jose from "filters/jose.filter";
+import useNonce from "filters/use-nonce.filter";
+
 import hallo from "handlers/hallo.handler";
 
 const port = 3000;
@@ -11,6 +13,7 @@ const server = express();
 server.use(bodyParser.json());
 server.use(newNonce);
 server.use(jose);
+server.use(useNonce);
 
 server.all("/*", hallo);
 

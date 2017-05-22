@@ -15,7 +15,16 @@ export default (req, _, next) => {
     next();
   } else {
     JoseService.GetDefaultInstance().verify(requestBody)
-      .then(({payload}) => {
+      .then(({payload, header}) => {
+        req.__leServoFilters = req.__leServoFilters || {};
+        req.__leServoFilters.jose = req.__leServoFilters.jose || {};
+        req.__leServoFilters = {
+          ...req.__leServoFilters,
+          jose: {
+            ...req.__leServoFilters.jose,
+            verifiedNonce: header.nonce
+          }
+        };
         req.body = payload;
         next();
       });
