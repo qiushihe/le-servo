@@ -1,3 +1,3 @@
 export default (_, res) => {
-  res.send("Hallo!").end();
+  res.status(204).end();
 };
