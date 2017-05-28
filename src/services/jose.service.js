@@ -63,13 +63,4 @@ class JoseService {
   }
 }
 
-let JoseServiceDefaultInstance = null;
-
-JoseService.GetDefaultInstance = (...args) => {
-  if (!JoseServiceDefaultInstance) {
-    JoseServiceDefaultInstance = new JoseService(...args);
-  }
-  return JoseServiceDefaultInstance;
-};
-
 export default JoseService;

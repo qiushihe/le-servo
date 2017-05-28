@@ -1,5 +1,5 @@
 import isEmpty from "lodash/fp/isEmpty";
-import JoseService from "services/jose.service";
+import {GetJoseService} from "services/default.services";
 import {getJson} from "helpers/json.helper";
 
 export default (req, _, next) => {
@@ -14,7 +14,7 @@ export default (req, _, next) => {
   if (isEmpty(protectedHeader) || isEmpty(payload) || isEmpty(signature)) {
     next();
   } else {
-    JoseService.GetDefaultInstance().verify(requestBody)
+    GetJoseService().verify(requestBody)
       .then(({payload, header}) => {
         req.__leServoFilters = req.__leServoFilters || {};
         req.__leServoFilters.jose = req.__leServoFilters.jose || {};

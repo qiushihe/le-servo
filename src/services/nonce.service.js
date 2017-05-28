@@ -35,13 +35,4 @@ class NonceService {
   }
 }
 
-let NonceServiceDefaultInstance = null;
-
-NonceService.GetDefaultInstance = (...args) => {
-  if (!NonceServiceDefaultInstance) {
-    NonceServiceDefaultInstance = new NonceService(...args);
-  }
-  return NonceServiceDefaultInstance;
-};
-
 export default NonceService;
