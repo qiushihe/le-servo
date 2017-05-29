@@ -67,6 +67,7 @@ describe("JoseFilter", () => {
         }).then(function () {
           expect(handler).to.have.been.calledOnce
             .and.to.have.been.calledWith(match.has("body", {lala: "LALA"}))
+            .and.to.have.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))
             .and.to.have.been.calledWith(matchHasDeep(
               "__leServoFilters.jose.verifiedNonce",
               "lala"
@@ -88,6 +89,7 @@ describe("JoseFilter", () => {
         }).then(function () {
           expect(handler).to.have.been.calledOnce
             .and.to.have.been.calledWith(match.has("body", {something: "else"}))
+            .and.to.have.not.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))
             .and.to.have.not.been.calledWith(matchHasDeep(
               "__leServoFilters.jose.verifiedNonce"
             ));

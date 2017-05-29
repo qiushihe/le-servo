@@ -15,14 +15,15 @@ export default (req, _, next) => {
     next();
   } else {
     GetJoseService().verify(requestBody)
-      .then(({payload, header}) => {
+      .then(({payload, header, key}) => {
         req.__leServoFilters = req.__leServoFilters || {};
         req.__leServoFilters.jose = req.__leServoFilters.jose || {};
         req.__leServoFilters = {
           ...req.__leServoFilters,
           jose: {
             ...req.__leServoFilters.jose,
-            verifiedNonce: header.nonce
+            verifiedNonce: header.nonce,
+            verifiedKey: key
           }
         };
         req.body = payload;
