@@ -52,7 +52,7 @@ class JoseService {
           return key;
         }
       } else {
-        return this.keystore.add(jwk);
+        return JWK.asKey(jwk);
       }
     }).then(
       (key) => JWS.createVerify(key).verify(jws)
@@ -60,6 +60,10 @@ class JoseService {
       ...result,
       payload: JSON.parse(result.payload)
     }));
+  }
+
+  addKey(key) {
+    return this.keystore.add(key);
   }
 }
 

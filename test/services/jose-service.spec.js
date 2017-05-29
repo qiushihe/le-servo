@@ -42,10 +42,7 @@ describe("JoseService", () => {
 
     it("should verify header and payload for existing key", async(() => {
       return promisedKey
-        .then((key) => {
-          service.keystore.add(key);
-          return key;
-        })
+        .then((key) => service.addKey(key))
         .then(sign(header, payload, {hasJwk: false, hasKid: true}))
         .then((jws) => service.verify(jws))
         .then(({payload: verifiedPayload, header: verifiedHeader}) => {
