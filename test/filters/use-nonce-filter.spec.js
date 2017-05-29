@@ -4,7 +4,7 @@ import express from "express";
 import Promise from "bluebird";
 import request from "request-promise";
 
-import NonceService from "services/nonce.service";
+import {GetNonceService} from "services/default.services";
 import useNonce from "filters/use-nonce.filter";
 
 import echo from "../helpers/echo.handler";
@@ -21,7 +21,7 @@ describe("UseNonceFilter", () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    service = NonceService.GetDefaultInstance();
+    service = GetNonceService();
     useNonceStub = sandbox.stub(service, "useNonce").returns(Promise.resolve());
 
     port = getRansomPort();
