@@ -7,7 +7,7 @@ import {
 } from "services/default.services";
 
 import newNonce from "filters/new-nonce.filter";
-import jose from "filters/jose.filter";
+import joseVerify from "filters/jose-verify.filter";
 import useNonce from "filters/use-nonce.filter";
 
 import empty from "handlers/empty.handler";
@@ -23,7 +23,7 @@ const server = express();
 
 server.use(bodyParser.json());
 server.use(newNonce);
-server.use(jose);
+server.use(joseVerify);
 server.use(useNonce);
 
 server.get("/directory", directory);

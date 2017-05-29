@@ -7,7 +7,7 @@ import bodyParser from "body-parser";
 import Promise from "bluebird";
 import request from "request-promise";
 
-import jose from "filters/jose.filter";
+import joseVerify from "filters/jose-verify.filter";
 
 import echo from "../helpers/echo.handler";
 import {getRansomPort} from "../helpers/server.helper";
@@ -17,7 +17,7 @@ import {matchHasDeep} from "../helpers/match.helper";
 
 chai.use(sinonChai);
 
-describe("JoseFilter", () => {
+describe("JoseVerifyFilter", () => {
   let sandbox;
   let header;
   let payload;
@@ -42,7 +42,7 @@ describe("JoseFilter", () => {
     handler = sandbox.spy(echo);
 
     server.use(bodyParser.json());
-    server.use(jose);
+    server.use(joseVerify);
     server.all("/*", handler);
 
     serverReady = new Promise((resolve) => {
