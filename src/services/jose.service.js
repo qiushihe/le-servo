@@ -63,7 +63,11 @@ class JoseService {
   }
 
   addKey(key) {
-    return this.keystore.add(key);
+    const {kid} = key;
+    const existingKey = this.keystore.get(kid);
+    return isEmpty(existingKey)
+      ? this.keystore.add(key)
+      : Promise.resolve(existingKey);
   }
 }
 
