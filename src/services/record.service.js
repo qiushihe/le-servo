@@ -19,9 +19,10 @@ class RecordService {
       ]
     })(options || {});
 
-    this.records = {};
     this.attributes = attributes;
     this.attributeNames = map("name")(this.attributes);
+
+    this.records = {};
   }
 
   get(key) {
