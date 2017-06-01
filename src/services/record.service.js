@@ -85,4 +85,4 @@ class RecordService {
   }
 }
 
-export default AccountService;
+export default RecordService;
