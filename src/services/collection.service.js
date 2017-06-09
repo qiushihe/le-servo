@@ -1,5 +1,6 @@
 import Promise from "bluebird";
 import reduce from "lodash/fp/reduce";
+import assign from "lodash/fp/assign";
 
 import RecordService from "services/record.service";
 
