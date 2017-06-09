@@ -44,7 +44,7 @@ describe("NonceFilter", () => {
       request({
         uri: `http://localhost:${port}/lala`,
         method: "GET"
-      }).then(function () {
+      }).then(() => {
         expect(handler).to.have.been.calledOnce;
         expect(handler.getCall(0).args[1].getHeader("replay-nonce")).to.be.ok
           .and.to.not.be.empty;
@@ -58,7 +58,7 @@ describe("NonceFilter", () => {
         uri: `http://localhost:${port}/lala`,
         method: "POST",
         body: "LALA"
-      }).then(function () {
+      }).then(() => {
         expect(handler).to.have.been.calledOnce;
         expect(handler.getCall(0).args[1].getHeader("replay-nonce")).to.be.ok
           .and.to.not.be.empty;
@@ -72,7 +72,7 @@ describe("NonceFilter", () => {
         uri: `http://localhost:${port}/lala`,
         method: "PUT",
         body: "LALA"
-      }).then(function () {
+      }).then(() => {
         expect(handler).to.have.been.calledOnce;
         expect(handler.getCall(0).args[1].getHeader("replay-nonce")).to.be.ok
           .and.to.not.be.empty;

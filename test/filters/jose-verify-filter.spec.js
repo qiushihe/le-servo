@@ -64,7 +64,7 @@ describe("JoseVerifyFilter", () => {
           method: "POST",
           json: true,
           body: jws
-        }).then(function () {
+        }).then(() => {
           expect(handler).to.have.been.calledOnce
             .and.to.have.been.calledWith(match.has("body", {lala: "LALA"}))
             .and.to.have.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))
@@ -86,7 +86,7 @@ describe("JoseVerifyFilter", () => {
           method: "POST",
           json: true,
           body: {something: "else"}
-        }).then(function () {
+        }).then(() => {
           expect(handler).to.have.been.calledOnce
             .and.to.have.been.calledWith(match.has("body", {something: "else"}))
             .and.to.have.not.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))

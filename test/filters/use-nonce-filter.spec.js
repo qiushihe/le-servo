@@ -51,7 +51,7 @@ describe("UseNonceFilter", () => {
         request({
           uri: `http://localhost:${port}/lala`,
           method: "GET"
-        }).then(function () {
+        }).then(() => {
           expect(useNonceStub).to.have.been.calledOnce
             .and.to.have.been.calledWith("42");
         })
@@ -74,7 +74,7 @@ describe("UseNonceFilter", () => {
         request({
           uri: `http://localhost:${port}/lala`,
           method: "GET"
-        }).then(function () {
+        }).then(() => {
           expect(useNonceStub).to.have.not.been.called;
         })
       ))
