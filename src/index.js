@@ -1,10 +1,10 @@
 import express from "express";
 import bodyParser from "body-parser";
 
-import {
-  Config as DefaultServicesConfig,
-  GetDirectoryService
-} from "services/default.services";
+import NonceService from "services/nonce.service";
+import JoseService from "services/jose.service";
+import DirectoryService from "services/directory.service";
+import CollectionService from "services/collection.service";
 
 import newNonce from "filters/new-nonce.filter";
 import joseVerify from "filters/jose-verify.filter";
@@ -13,20 +13,31 @@ import useNonce from "filters/use-nonce.filter";
 import empty from "handlers/empty.handler";
 import directory from "handlers/directory.handler";
 
-DefaultServicesConfig.DirectoryService = [{origin: "http://localhost:3000"}];
+const nonceService = new NonceService({bufferSize: 32});
+const joseService = new JoseService();
+const directoryService = new DirectoryService({origin: "http://localhost:3000"});
+const collectionService = new CollectionService({
+  records: [{
+    name: "account",
+    attributes: [
+      {name: "status", defaultValue: "valid"},
+      {name: "contact", defaultValue: []},
+      {name: "termsOfServiceAgreed", defaultValue: false}
+    ]
+  }]
+});
 
-const directoryService = GetDirectoryService();
 directoryService.addField("new-nonce", {method: "all", path: "/new-nonce", handler: empty});
 
 const port = 3000;
 const server = express();
 
 server.use(bodyParser.json());
-server.use(newNonce);
-server.use(joseVerify);
-server.use(useNonce);
+server.use(newNonce({nonceService}));
+server.use(joseVerify({joseService}));
+server.use(useNonce({nonceService}));
 
-server.get("/directory", directory);
+server.get("/directory", directory({directoryService}));
 
 directoryService.each((_, {method, path, handler}) => {
   server[method](path, handler);

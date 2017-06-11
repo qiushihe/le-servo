@@ -5,6 +5,7 @@ import express from "express";
 import Promise from "bluebird";
 import request from "request-promise";
 
+import NonceService from "services/nonce.service";
 import newNonce from "filters/new-nonce.filter";
 
 import echo from "../helpers/echo.handler";
@@ -13,8 +14,9 @@ import {async} from "../helpers/test.helper";
 
 chai.use(sinonChai);
 
-describe("NonceFilter", () => {
+describe("NewNonceFilter", () => {
   let sandbox;
+  let service;
   let port;
   let server;
   let handler;
@@ -22,12 +24,13 @@ describe("NonceFilter", () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    service = new NonceService({bufferSize: 32});
 
     port = getRansomPort();
     server = express();
     handler = sandbox.spy(echo);
 
-    server.use(newNonce);
+    server.use(newNonce({nonceService: service}));
     server.all("/*", handler);
 
     serverReady = new Promise((resolve) => {
