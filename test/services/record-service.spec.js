@@ -19,12 +19,32 @@ describe("RecordService", () => {
     });
   });
 
-  describe("#get()", () => {
+  describe("#find()", () => {
     beforeEach(() => {
-      service.records["lala"] = {title: "LALA", score: 42};
+      service.records["lala1"] = {id: "lala1", title: "LALA1", score: 42};
+      service.records["lala2"] = {id: "lala2", title: "LALA2", score: 43};
     });
 
-    it("should return record by key", async(() => (
+    it("should find record with maching query", async(() => (
+      service.find({title: "LALA1"}).then((record) => {
+        expect(record).to.have.property("title", "LALA1");
+        expect(record).to.have.property("score", 42);
+      })
+    )));
+
+    it("should not find anything with mis-matching query", async(() => (
+      service.find({title: "LALA42"}).then((record) => {
+        expect(record).to.be.null;
+      })
+    )));
+  });
+
+  describe("#get()", () => {
+    beforeEach(() => {
+      service.records["lala"] = {id: "lala", title: "LALA", score: 42};
+    });
+
+    it("should return record by id", async(() => (
       service.get("lala").then((record) => {
         expect(record).to.have.property("title", "LALA");
         expect(record).to.have.property("score", 42);
@@ -39,16 +59,16 @@ describe("RecordService", () => {
       })
     )));
 
-    it("should not accept invalid key", () => (
+    it("should not accept invalid id", () => (
       service.get("lala42").then(() => {
-        const err = new Error("Invalid key accepted");
+        const err = new Error("Invalid id accepted");
         err._rethrow = true;
         throw err;
       }).catch((err) => {
         if (err._rethrow) {
           throw err;
         }
-        expect(err.message).to.equal("Record not found with key: lala42");
+        expect(err.message).to.equal("Record not found with id: lala42");
       })
     ));
   });
@@ -69,24 +89,24 @@ describe("RecordService", () => {
       })
     )));
 
-    it("should not accept existing key", () => {
-      service.records["lala42"] = {title: "Lala42 title", score: 42};
+    it("should not accept existing id", () => {
+      service.records["lala42"] = {id: "lala42", title: "Lala42 title", score: 42};
       return service.create("lala42").then(() => {
-        const err = new Error("Existing key accepted");
+        const err = new Error("Existing id accepted");
         err._rethrow = true;
         throw err;
       }).catch((err) => {
         if (err._rethrow) {
           throw err;
         }
-        expect(err.message).to.equal("Record already exist with key: lala42");
+        expect(err.message).to.equal("Record already exist with id: lala42");
       });
     });
   });
 
   describe("#update()", () => {
     beforeEach(() => {
-      service.records["lala"] = {title: "Lala title", score: 42};
+      service.records["lala"] = {id: "lala", title: "Lala title", score: 42};
     });
 
     it("should update a record with new values", async(() => (
@@ -104,24 +124,24 @@ describe("RecordService", () => {
       })
     )));
 
-    it("should not accept invalid key", () => (
+    it("should not accept invalid id", () => (
       service.update("lala42", {title: "New title"}).then(() => {
-        const err = new Error("Invalid key accepted");
+        const err = new Error("Invalid id accepted");
         err._rethrow = true;
         throw err;
       }).catch((err) => {
         if (err._rethrow) {
           throw err;
         }
-        expect(err.message).to.equal("Record not found with key: lala42");
+        expect(err.message).to.equal("Record not found with id: lala42");
       })
     ));
   });
 
   describe("#remove()", () => {
     beforeEach(() => {
-      service.records["lala1"] = {title: "Lala1 title", score: 42};
-      service.records["lala2"] = {title: "Lala2 title", score: 43};
+      service.records["lala1"] = {id: "lala1", title: "Lala1 title", score: 42};
+      service.records["lala2"] = {id: "lala2", title: "Lala2 title", score: 43};
     });
 
     it("should remove a record", async(() => (
@@ -130,16 +150,16 @@ describe("RecordService", () => {
       })
     )));
 
-    it("should not accept invalid key", () => (
+    it("should not accept invalid id", () => (
       service.remove("lala42").then(() => {
-        const err = new Error("Invalid key accepted");
+        const err = new Error("Invalid id accepted");
         err._rethrow = true;
         throw err;
       }).catch((err) => {
         if (err._rethrow) {
           throw err;
         }
-        expect(err.message).to.equal("Record not found with key: lala42");
+        expect(err.message).to.equal("Record not found with id: lala42");
       })
     ));
   });

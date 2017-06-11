@@ -2,6 +2,8 @@ import Promise from "bluebird";
 import assign from "lodash/fp/assign";
 import map from "lodash/fp/map";
 import reduce from "lodash/fp/reduce";
+import flow from "lodash/fp/flow";
+import values from "lodash/fp/values";
 import find from "lodash/fp/find";
 import isUndefined from "lodash/fp/isUndefined";
 import isEmpty from "lodash/fp/isEmpty";
@@ -25,37 +27,55 @@ class RecordService {
     this.records = {};
   }
 
-  get(key) {
-    return new Promise((resolve, reject) => {
-      const record = this.records[key];
+  find(query) {
+    return new Promise((resolve) => {
+      const record = flow([
+        values,
+        find(query)
+      ])(this.records);
+
       if (record) {
         resolve(cloneDeep(record));
       } else {
-        reject(new Error(`Record not found with key: ${key}`));
+        resolve(null);
       }
     });
   }
 
-  create(key) {
+  get(id) {
     return new Promise((resolve, reject) => {
-      if (this.records[key]) {
-        reject(new Error(`Record already exist with key: ${key}`));
+      const record = this.records[id];
+      if (record) {
+        resolve(cloneDeep(record));
       } else {
-        this.records[key] = reduce((result, {name, defaultValue}) => ({
-          ...result,
-          [name]: isFunction(defaultValue) ? defaultValue(result) : defaultValue
-        }), {})(this.attributes);
-        resolve(cloneDeep(this.records[key]));
+        reject(new Error(`Record not found with id: ${id}`));
       }
     });
   }
 
-  update(key, payload) {
+  create(id) {
     return new Promise((resolve, reject) => {
-      const record = this.records[key];
+      if (this.records[id]) {
+        reject(new Error(`Record already exist with id: ${id}`));
+      } else {
+        this.records[id] = {
+          ...reduce((result, {name, defaultValue}) => ({
+            ...result,
+            [name]: isFunction(defaultValue) ? defaultValue(result) : defaultValue
+          }), {})(this.attributes),
+          id
+        };
+        resolve(cloneDeep(this.records[id]));
+      }
+    });
+  }
+
+  update(id, payload) {
+    return new Promise((resolve, reject) => {
+      const record = this.records[id];
 
       if (!record) {
-        reject(new Error(`Record not found with key: ${key}`));
+        reject(new Error(`Record not found with id: ${id}`));
       }
 
       const update = reduce((result, attributeName) => (
@@ -65,20 +85,20 @@ class RecordService {
       ), {})(this.attributeNames);
 
       if (!isEmpty(update)) {
-        this.records[key] = {...record, ...update};
+        this.records[id] = {...record, ...update, id};
       }
 
-      resolve(cloneDeep(this.records[key]));
+      resolve(cloneDeep(this.records[id]));
     });
   }
 
-  remove(key) {
+  remove(id) {
     return new Promise((resolve, reject) => {
-      const record = this.records[key];
+      const record = this.records[id];
       if (!record) {
-        reject(new Error(`Record not found with key: ${key}`));
+        reject(new Error(`Record not found with id: ${id}`));
       } else {
-        delete this.records[key];
+        delete this.records[id];
         resolve(cloneDeep(record));
       }
     });
