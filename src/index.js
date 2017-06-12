@@ -12,22 +12,30 @@ import useNonce from "filters/use-nonce.filter";
 
 import empty from "handlers/empty.handler";
 import directory from "handlers/directory.handler";
+import newAccount from "handlers/account/new-account.handler";
 
 const nonceService = new NonceService({bufferSize: 32});
 const joseService = new JoseService();
 const directoryService = new DirectoryService({origin: "http://localhost:3000"});
 const collectionService = new CollectionService({
   records: [{
-    name: "account",
+    name: "accounts",
     attributes: [
       {name: "status", defaultValue: "valid"},
       {name: "contact", defaultValue: []},
-      {name: "termsOfServiceAgreed", defaultValue: false}
+      {name: "termsOfServiceAgreed", defaultValue: false},
+      {name: "kid", defaultValue: null}
     ]
   }]
 });
 
-directoryService.addField("new-nonce", {method: "all", path: "/new-nonce", handler: empty});
+directoryService.addField("new-nonce", {
+  method: "all", path: "/new-nonce", handler: empty
+});
+
+directoryService.addField("new-account", {
+  method: "post", path: "/new-account", handler: newAccount
+});
 
 const port = 3000;
 const server = express();
