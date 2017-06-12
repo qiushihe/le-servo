@@ -9,6 +9,10 @@ class DirectoryService {
     this.fields = {};
   }
 
+  getFullUrl(path) {
+    return `${this.origin}${path}`;
+  }
+
   addField(field, {method, path, handler}) {
     this.fields[field] = {method, path, handler};
   }
