@@ -5,6 +5,7 @@ import NonceService from "services/nonce.service";
 import JoseService from "services/jose.service";
 import DirectoryService from "services/directory.service";
 import CollectionService from "services/collection.service";
+import AccountService from "services/account.service";
 
 import newNonce from "filters/new-nonce.filter";
 import joseVerify from "filters/jose-verify.filter";
@@ -29,12 +30,21 @@ const collectionService = new CollectionService({
   }]
 });
 
+const accountService = new AccountService({
+  joseService,
+  storage: collectionService
+});
+
 directoryService.addField("new-nonce", {
-  method: "all", path: "/new-nonce", handler: empty
+  method: "all",
+  path: "/new-nonce",
+  handler: empty
 });
 
 directoryService.addField("new-account", {
-  method: "post", path: "/new-account", handler: newAccount
+  method: "post",
+  path: "/new-account",
+  handler: newAccount({directoryService, accountService})
 });
 
 const port = 3000;

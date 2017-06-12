@@ -15,6 +15,7 @@ chai.use(sinonChai);
 
 describe("NewAccountHandler", () => {
   let sandbox;
+  let directoryService;
   let accountService;
   let port;
   let server;
@@ -23,7 +24,12 @@ describe("NewAccountHandler", () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
+    directoryService = {
+      getFullUrl: (path) => `http://lalaland.com${path}`
+    };
+
     accountService = {
+      find: sandbox.stub(),
       create: sandbox.stub()
     };
 
@@ -35,7 +41,7 @@ describe("NewAccountHandler", () => {
       req.__leServoFilters = {jose: {verifiedKey: {kid: "verified-key-42", alg: "some-alg"}}};
       next();
     });
-    server.post("/new-account", newAccount({accountService}));
+    server.post("/new-account", newAccount({directoryService, accountService}));
 
     serverReady = new Promise((resolve) => {
       server.listen(port, resolve);
@@ -47,15 +53,8 @@ describe("NewAccountHandler", () => {
   });
 
   it("should call account service to create account", async(() => {
-    const header = {nonce: "42", url: "http://lala.land/lala"};
-    const payload = {
-      "terms-of-service-agreed": true,
-      "contact": ["mailto:lala@lalaland.com"]
-    };
-
-    accountService.create.returns(Promise.resolve({
-      id: "42"
-    }));
+    accountService.find.returns(Promise.resolve(null));
+    accountService.create.returns(Promise.resolve({id: "42"}));
 
     return serverReady
       .then(() => (
@@ -63,7 +62,10 @@ describe("NewAccountHandler", () => {
           uri: `http://localhost:${port}/new-account`,
           method: "POST",
           json: true,
-          body: payload
+          body: {
+            "terms-of-service-agreed": true,
+            "contact": ["mailto:lala@lalaland.com"]
+          }
         })
       ))
       .then((res) => {
@@ -77,14 +79,8 @@ describe("NewAccountHandler", () => {
       });
   }));
 
-  it("should serialize account in JSON response", async(() => {
-    const header = {nonce: "42", url: "http://lala.land/lala"};
-    const payload = {
-      "terms-of-service-agreed": true,
-      "contact": ["mailto:lala@lalaland.com"]
-    };
-
-    accountService.create.returns(Promise.resolve({
+  it("should respond with account JSON and location header", async(() => {
+    accountService.find.returns(Promise.resolve({
       status: "valid",
       contact: ["mailto:lala@lalaland.com"],
       termsOfServiceAgreed: true,
@@ -98,16 +94,48 @@ describe("NewAccountHandler", () => {
           uri: `http://localhost:${port}/new-account`,
           method: "POST",
           json: true,
-          body: payload
+          body: {
+            "terms-of-service-agreed": true,
+            "contact": ["mailto:lala@lalaland.com"]
+          },
+          resolveWithFullResponse: true
         })
       ))
       .then((res) => {
-        expect(res).to.have.property("status", "valid");
-        expect(res).to.have.property("contact");
-        expect(res.contact).to.deep.equal(["mailto:lala@lalaland.com"]);
-        expect(res).to.have.property("terms-of-service-agreed", true);
-        expect(res).to.have.property("orders");
-        expect(res.orders).to.match(/^http/);
+        expect(res.headers).to.have.property("location", "http://lalaland.com/accounts/42");
+        expect(res.body).to.have.property("status", "valid");
+        expect(res.body).to.have.property("contact");
+        expect(res.body.contact).to.deep.equal(["mailto:lala@lalaland.com"]);
+        expect(res.body).to.have.property("terms-of-service-agreed", true);
+        expect(res.body).to.have.property("orders");
+        expect(res.body.orders).to.match(/^http/);
       });
   }));
+
+  it("should respond with 404 when no account is found with only-return-existing", async(() => {
+    accountService.find.returns(Promise.resolve(null));
+    return serverReady
+      .then(() => (
+        request({
+          uri: `http://localhost:${port}/new-account`,
+          method: "POST",
+          json: true,
+          body: {
+            "only-return-existing": true
+          },
+          resolveWithFullResponse: true
+        })
+      ))
+      .then(() => {
+        const err = new Error("Request should not be successful");
+        err._rethrow = true;
+        throw err;
+      })
+      .catch((err) => {
+        if (err._rethrow) {
+          throw err;
+        }
+        expect(err).to.have.property("statusCode", 404);
+      });
+  }))
 });
