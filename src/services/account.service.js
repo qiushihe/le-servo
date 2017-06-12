@@ -21,6 +21,12 @@ class AccountService {
     });
   }
 
+  get(id) {
+    return this.storage.get("accounts").then((accounts) => {
+      return accounts.get(id);
+    });
+  }
+
   create({termsOfServiceAgreed, contact, key}) {
     return this.storage.get("accounts").then((accounts) => {
       return accounts.create(uuidV4())

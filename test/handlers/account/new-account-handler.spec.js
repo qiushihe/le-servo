@@ -137,5 +137,5 @@ describe("NewAccountHandler", () => {
         }
         expect(err).to.have.property("statusCode", 404);
       });
-  }))
+  }));
 });

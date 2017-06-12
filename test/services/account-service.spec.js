@@ -64,6 +64,39 @@ describe("AccountService", () => {
     )));
   });
 
+  describe("#get()", () => {
+    beforeEach(() => {
+      service.storage.collections.accounts.records["lala42"] = {
+        id: "lala42",
+        status: "valid",
+        contact: ["lala@lalaland.com"],
+        termsOfServiceAgreed: true,
+        kid: "key-42"
+      };
+    });
+
+    it("should return account with matching id", async(() => (
+      service.get("lala42").then((account) => {
+        expect(account).to.have.property("id", "lala42");
+        expect(account).to.have.property("kid", "key-42");
+      })
+    )));
+
+    it("should not return account with mis-matching id", async(() => (
+      service.get("lala43").then(() => {
+        const err = new Error("Promise should not resolve with mis-matching id");
+        err._rethrow = true;
+        throw err;
+      })
+      .catch((err) => {
+        if (err._rethrow) {
+          throw err;
+        }
+        expect(err).to.have.property("message", "Record not found with id: lala43");
+      })
+    )));
+  });
+
   describe("#create()", () => {
     it("should create new account", async(() => (
       service.create({
