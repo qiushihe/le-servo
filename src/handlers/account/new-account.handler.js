@@ -1,9 +1,10 @@
 import get from "lodash/fp/get";
 
+import {getJoseVerifiedKey} from "helpers/request.helper";
+
 const getRequestOnlyReturnExisting = get("body.only-return-existing");
 const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");
 const getRequestContact = get("body.contact");
-const getJoseVerifiedKey = get("__leServoFilters.jose.verifiedKey");
 
 export default ({
   directoryService,

@@ -14,6 +14,7 @@ import useNonce from "filters/use-nonce.filter";
 import empty from "handlers/empty.handler";
 import directory from "handlers/directory.handler";
 import newAccount from "handlers/account/new-account.handler";
+import updateAccount from "handlers/account/update-account.handler";
 
 const nonceService = new NonceService({bufferSize: 32});
 const joseService = new JoseService();
@@ -60,6 +61,8 @@ server.get("/directory", directory({directoryService}));
 directoryService.each((_, {method, path, handler}) => {
   server[method](path, handler);
 });
+
+server.post("/accounts/:accound_id", updateAccount());
 
 server.listen(port, () => {
   console.log(`Server started on port ${port}`);
