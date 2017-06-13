@@ -1,8 +1,12 @@
 import get from "lodash/fp/get";
+import omitBy from "lodash/fp/omitBy";
+import isEmpty from "lodash/fp/isEmpty";
 
 import {getJoseVerifiedKey} from "helpers/request.helper";
 
 const getRequestAccountId = get("params.accound_id");
+const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");
+const getRequestContact = get("body.contact");
 
 export default ({accountService, directoryService}) => (req, res) => {
   const key = getJoseVerifiedKey(req);
@@ -17,6 +21,17 @@ export default ({accountService, directoryService}) => (req, res) => {
       throw new Error("Account key mis-match");
     }
 
+    const payload = omitBy((value) => {
+      return value === undefined || value === null;
+    })({
+      contact: getRequestContact(req),
+      termsOfServiceAgreed: getRequestTermsOfServiceAgreed(req)
+    });
+
+    return isEmpty(payload)
+      ? account
+      : accountService.update(accountId, payload);
+  }).then((account) => {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Location", directoryService.getFullUrl(`/accounts/${account.id}`));
     res.send(JSON.stringify({

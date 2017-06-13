@@ -45,6 +45,12 @@ class AccountService {
         });
     });
   }
+
+  update(id, {contact, termsOfServiceAgreed}) {
+    return this.storage.get("accounts").then((accounts) => {
+      return accounts.update(id, {contact, termsOfServiceAgreed});
+    });
+  }
 }
 
 export default AccountService;

@@ -114,4 +114,28 @@ describe("AccountService", () => {
       })
     )));
   });
+
+  describe("#update()", () => {
+    beforeEach(() => {
+      service.storage.collections.accounts.records["lala42"] = {
+        id: "lala42",
+        status: "valid",
+        contact: ["lala@lalaland.com"],
+        termsOfServiceAgreed: false,
+        kid: "key-42"
+      };
+    });
+
+    it("should update existing account", async(() => (
+      service.update("lala42", {
+        termsOfServiceAgreed: true,
+        contact: ["mailto:lala2@lalaland.com"]
+      })
+      .then((account) => {
+        expect(account).to.have.property("id", "lala42");
+        expect(account).to.have.property("termsOfServiceAgreed", true);
+        expect(account.contact).to.deep.equal(["mailto:lala2@lalaland.com"]);
+      })
+    )));
+  });
 });
