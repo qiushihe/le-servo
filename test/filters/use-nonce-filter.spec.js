@@ -4,7 +4,7 @@ import express from "express";
 import Promise from "bluebird";
 import request from "request-promise";
 
-import {GetNonceService} from "services/default.services";
+import NonceService from "services/nonce.service";
 import useNonce from "filters/use-nonce.filter";
 
 import echo from "../helpers/echo.handler";
@@ -21,7 +21,7 @@ describe("UseNonceFilter", () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    service = GetNonceService();
+    service = new NonceService({bufferSize: 32});
     useNonceStub = sandbox.stub(service, "useNonce").returns(Promise.resolve());
 
     port = getRansomPort();
@@ -38,7 +38,7 @@ describe("UseNonceFilter", () => {
         req.__leServoFilters = {jose: {verifiedNonce: "42"}};
         next();
       });
-      server.use(useNonce);
+      server.use(useNonce({nonceService: service}));
       server.all("/*", echo);
 
       serverReady = new Promise((resolve) => {
@@ -61,7 +61,7 @@ describe("UseNonceFilter", () => {
 
   describe("without verified nonce", () => {
     beforeEach(() => {
-      server.use(useNonce);
+      server.use(useNonce({nonceService: service}));
       server.all("/*", echo);
 
       serverReady = new Promise((resolve) => {

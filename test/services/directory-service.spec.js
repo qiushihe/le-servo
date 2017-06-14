@@ -19,6 +19,12 @@ describe("DirectoryService", () => {
     sandbox.restore();
   });
 
+  describe("#getFullUrl()", () => {
+    it("should return full URL with origin", () => {
+      expect(service.getFullUrl("/lala/42")).to.equal("http://lala.com/acme/lala/42");
+    });
+  });
+
   describe("#addField()", () => {
     it("should store the field data", () => {
       const handler = () => {};

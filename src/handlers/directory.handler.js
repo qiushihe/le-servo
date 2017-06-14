@@ -1,6 +1,4 @@
-import {GetDirectoryService} from "services/default.services";
-
-export default (_, res) => {
+export default ({directoryService}) => (_, res) => {
   res.setHeader("Content-Type", "application/json");
-  res.send(JSON.stringify(GetDirectoryService().toJSON())).end();
+  res.send(JSON.stringify(directoryService.toJSON())).end();
 };

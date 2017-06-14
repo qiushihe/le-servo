@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import Promise from "bluebird";
 import request from "request-promise";
 
+import JoseService from "services/jose.service";
 import joseVerify from "filters/jose-verify.filter";
 
 import echo from "../helpers/echo.handler";
@@ -19,6 +20,7 @@ chai.use(sinonChai);
 
 describe("JoseVerifyFilter", () => {
   let sandbox;
+  let service;
   let header;
   let payload;
   let keystore;
@@ -30,6 +32,7 @@ describe("JoseVerifyFilter", () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    service = new JoseService();
 
     header = {nonce: "lala", url: "http://lala.land/lala"};
     payload = {lala: "LALA"};
@@ -42,7 +45,7 @@ describe("JoseVerifyFilter", () => {
     handler = sandbox.spy(echo);
 
     server.use(bodyParser.json());
-    server.use(joseVerify);
+    server.use(joseVerify({joseService: service}));
     server.all("/*", handler);
 
     serverReady = new Promise((resolve) => {
