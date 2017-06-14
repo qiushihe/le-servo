@@ -62,7 +62,7 @@ directoryService.each((_, {method, path, handler}) => {
   server[method](path, handler);
 });
 
-server.post("/accounts/:accound_id", updateAccount());
+server.post("/accounts/:accound_id", updateAccount({directoryService, accountService}));
 
 server.listen(port, () => {
   console.log(`Server started on port ${port}`);
