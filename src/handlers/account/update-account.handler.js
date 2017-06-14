@@ -14,9 +14,8 @@ export default ({accountService, directoryService}) => (req, res) => {
   const key = getJoseVerifiedKey(req);
   const accountId = getRequestAccountId(req);
 
-  accountService.get(accountId).catch((err) => {
-    res.status(404).end();
-    throw err;
+  accountService.get(accountId).catch(() => {
+    throw new Error("Account not found");
   }).then((account) => {
     if (account.kid !== key.kid) {
       throw new Error("Account key mis-match");
@@ -48,7 +47,9 @@ export default ({accountService, directoryService}) => (req, res) => {
       orders: "http://TODO" // TODO: Get orders URL
     })).end();
   }).catch(({message}) => {
-    if (message === "Account key mis-match") {
+    if (message === "Account not found") {
+      res.status(404).send(message).end();
+    } else if (message === "Account key mis-match") {
       res.status(401).send(message).end();
     } else if (message === "Account deactivated") {
       res.status(403).send(message).end();
