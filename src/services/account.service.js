@@ -51,6 +51,12 @@ class AccountService {
       return accounts.update(id, {contact, termsOfServiceAgreed});
     });
   }
+
+  deactivate(id) {
+    return this.storage.get("accounts").then((accounts) => {
+      return accounts.update(id, {status: "deactivated"});
+    });
+  }
 }
 
 export default AccountService;

@@ -138,4 +138,22 @@ describe("AccountService", () => {
       })
     )));
   });
+
+  describe("#deactivate()", () => {
+    beforeEach(() => {
+      service.storage.collections.accounts.records["lala42"] = {
+        id: "lala42",
+        status: "valid",
+        contact: ["lala@lalaland.com"],
+        termsOfServiceAgreed: false,
+        kid: "key-42"
+      };
+    });
+
+    it("should deactivate account", async(() => (
+      service.deactivate("lala42").then((account) => {
+        expect(account).to.have.property("status", "deactivated");
+      })
+    )));
+  });
 });

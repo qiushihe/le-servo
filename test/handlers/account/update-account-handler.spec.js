@@ -41,11 +41,13 @@ describe("UpdateAccountHandler", () => {
     };
 
     accountService = {
-      get: sandbox.stub().returns(Promise.resolve({...dummyAccount})),
-      update: (_, payload) => Promise.resolve({...dummyAccount, ...payload})
+      get: (_) => Promise.resolve({...dummyAccount}),
+      update: (_, payload) => Promise.resolve({...dummyAccount, ...payload}),
+      deactivate: (_) => Promise.resolve({...dummyAccount, status: "deactivated"})
     };
 
     sandbox.spy(accountService, "update");
+    sandbox.spy(accountService, "deactivate");
 
     server.use(bodyParser.json());
     server.use((req, _, next) => {
@@ -95,14 +97,84 @@ describe("UpdateAccountHandler", () => {
           body: {
             "terms-of-service-agreed": true,
             "contact": ["mailto:lala2@lalaland.com"]
-          },
-          resolveWithFullResponse: true
+          }
         })
       ))
       .then((res) => {
         expect(accountService.update).to.have.been.calledOnce;
-        expect(res.body.contact).to.deep.equal(["mailto:lala2@lalaland.com"]);
-        expect(res.body).to.have.property("terms-of-service-agreed", true);
+        expect(res.contact).to.deep.equal(["mailto:lala2@lalaland.com"]);
+        expect(res).to.have.property("terms-of-service-agreed", true);
+      });
+  }));
+
+  it("should call account service to deactivate account", async(() => {
+    return serverReady
+      .then(() => (
+        request({
+          uri: `http://localhost:${port}/accounts/42`,
+          method: "POST",
+          json: true,
+          body: {
+            "status": "deactivated"
+          }
+        })
+      ))
+      .then((res) => {
+        expect(accountService.deactivate).to.have.been.calledOnce
+          .and.to.have.been.calledWith("42");
+        expect(res).to.have.property("status", "deactivated");
+      });
+  }));
+
+  it("should not accept account with mis-matching key", async(() => {
+    dummyAccount.kid = "a-different-key-42";
+
+    return serverReady
+      .then(() => (
+        request({
+          uri: `http://localhost:${port}/accounts/42`,
+          method: "POST",
+          json: true,
+          body: {"contact": ["mailto:lala2@lalaland.com"]}
+        })
+      ))
+      .then(() => {
+        const err = new Error("Should not accept account with mis-matching key");
+        err._rethrow = true;
+        throw err;
+      })
+      .catch((err) => {
+        if (err._rethrow) {
+          throw err;
+        }
+        expect(err).to.have.property("statusCode", 401);
+        expect(err).to.have.property("message", "401 - \"Account key mis-match\"");
+      });
+  }));
+
+  it("should not accept deactivated account", async(() => {
+    dummyAccount.status = "deactivated";
+
+    return serverReady
+      .then(() => (
+        request({
+          uri: `http://localhost:${port}/accounts/42`,
+          method: "POST",
+          json: true,
+          body: {"contact": ["mailto:lala2@lalaland.com"]}
+        })
+      ))
+      .then(() => {
+        const err = new Error("Should not accept deactivated account");
+        err._rethrow = true;
+        throw err;
+      })
+      .catch((err) => {
+        if (err._rethrow) {
+          throw err;
+        }
+        expect(err).to.have.property("statusCode", 403);
+        expect(err).to.have.property("message", "403 - \"Account deactivated\"");
       });
   }));
 });

@@ -7,6 +7,8 @@ import {getJoseVerifiedKey} from "helpers/request.helper";
 const getRequestAccountId = get("params.accound_id");
 const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");
 const getRequestContact = get("body.contact");
+const getRequestStatus = get("body.status");
+const isValuePresent = (value) => (value === undefined || value === null);
 
 export default ({accountService, directoryService}) => (req, res) => {
   const key = getJoseVerifiedKey(req);
@@ -17,13 +19,14 @@ export default ({accountService, directoryService}) => (req, res) => {
     throw err;
   }).then((account) => {
     if (account.kid !== key.kid) {
-      res.status(401).end();
       throw new Error("Account key mis-match");
     }
 
-    const payload = omitBy((value) => {
-      return value === undefined || value === null;
-    })({
+    if (account.status === "deactivated") {
+      throw new Error("Account deactivated");
+    }
+
+    const payload = omitBy(isValuePresent)({
       contact: getRequestContact(req),
       termsOfServiceAgreed: getRequestTermsOfServiceAgreed(req)
     });
@@ -31,6 +34,10 @@ export default ({accountService, directoryService}) => (req, res) => {
     return isEmpty(payload)
       ? account
       : accountService.update(accountId, payload);
+  }).then((account) => {
+    return getRequestStatus(req) === "deactivated"
+      ? accountService.deactivate(accountId)
+      : account;
   }).then((account) => {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Location", directoryService.getFullUrl(`/accounts/${account.id}`));
@@ -40,5 +47,13 @@ export default ({accountService, directoryService}) => (req, res) => {
       "terms-of-service-agreed": account.termsOfServiceAgreed,
       orders: "http://TODO" // TODO: Get orders URL
     })).end();
+  }).catch(({message}) => {
+    if (message === "Account key mis-match") {
+      res.status(401).send(message).end();
+    } else if (message === "Account deactivated") {
+      res.status(403).send(message).end();
+    } else {
+      res.status(500).send(message).end();
+    }
   });
 };
