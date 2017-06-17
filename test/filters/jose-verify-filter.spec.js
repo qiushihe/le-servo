@@ -1,6 +1,4 @@
-import chai, {expect} from "chai";
-import sinon, {match} from "sinon";
-import sinonChai from "sinon-chai";
+import {match} from "sinon";
 import {JWK} from "node-jose";
 import express from "express";
 import bodyParser from "body-parser";
@@ -15,8 +13,6 @@ import {getRansomPort} from "../helpers/server.helper";
 import {async} from "../helpers/test.helper";
 import {signWithJws as sign} from "../helpers/jws.helper";
 import {matchHasDeep} from "../helpers/match.helper";
-
-chai.use(sinonChai);
 
 describe("JoseVerifyFilter", () => {
   let sandbox;

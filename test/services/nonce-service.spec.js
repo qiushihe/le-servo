@@ -1,4 +1,3 @@
-import {expect} from "chai";
 import Promise from "bluebird";
 import uuidV4 from "uuid/v4";
 

@@ -1,10 +1,6 @@
-import chai, {expect} from "chai";
-import sinon, {match} from "sinon";
-import sinonChai from "sinon-chai";
+import {match} from "sinon";
 
 import DirectoryService from "services/directory.service";
-
-chai.use(sinonChai);
 
 describe("DirectoryService", () => {
   let sandbox;

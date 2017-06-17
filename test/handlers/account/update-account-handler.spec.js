@@ -1,6 +1,4 @@
-import chai, {expect} from "chai";
-import sinon from "sinon";
-import sinonChai from "sinon-chai";
+import {expect} from "chai";
 import express from "express";
 import bodyParser from "body-parser";
 import Promise from "bluebird";
@@ -10,8 +8,6 @@ import updateAccount from "handlers/account/update-account.handler";
 
 import {getRansomPort} from "../../helpers/server.helper";
 import {async} from "../../helpers/test.helper";
-
-chai.use(sinonChai);
 
 describe("UpdateAccountHandler", () => {
   let sandbox;

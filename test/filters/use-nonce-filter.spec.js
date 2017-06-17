@@ -1,5 +1,3 @@
-import {expect} from "chai";
-import sinon from "sinon";
 import express from "express";
 import Promise from "bluebird";
 import request from "request-promise";

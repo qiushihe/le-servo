@@ -1,11 +1,6 @@
-import chai, {expect} from "chai";
-import chaiChange from "chai-change";
-
 import RecordService from "services/record.service";
 
 import {async} from "../helpers/test.helper";
-
-chai.use(chaiChange);
 
 describe("RecordService", () => {
   let service;

@@ -1,6 +1,4 @@
-import chai, {expect} from "chai";
-import sinon, {match} from "sinon";
-import sinonChai from "sinon-chai";
+import {match} from "sinon";
 import Promise from "bluebird";
 
 import JoseService from "services/jose.service";
@@ -8,8 +6,6 @@ import CollectionService from "services/collection.service";
 import AccountService from "services/account.service";
 
 import {async} from "../helpers/test.helper";
-
-chai.use(sinonChai);
 
 describe("AccountService", () => {
   let sandbox;

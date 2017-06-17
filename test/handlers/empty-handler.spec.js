@@ -1,4 +1,3 @@
-import {expect} from "chai";
 import request from "request-promise";
 
 import empty from "handlers/empty.handler";

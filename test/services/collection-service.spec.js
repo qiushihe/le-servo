@@ -1,5 +1,3 @@
-import {expect} from "chai";
-
 import CollectionService from "services/collection.service";
 
 import {async} from "../helpers/test.helper";

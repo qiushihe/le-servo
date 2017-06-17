@@ -1,6 +1,4 @@
-import chai, {expect} from "chai";
-import sinon, {match} from "sinon";
-import sinonChai from "sinon-chai";
+import {match} from "sinon";
 import express from "express";
 import Promise from "bluebird";
 import request from "request-promise";
@@ -11,8 +9,6 @@ import newNonce from "filters/new-nonce.filter";
 import echo from "../helpers/echo.handler";
 import {getRansomPort} from "../helpers/server.helper";
 import {async} from "../helpers/test.helper";
-
-chai.use(sinonChai);
 
 describe("NewNonceFilter", () => {
   let sandbox;
