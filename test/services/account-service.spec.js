@@ -1,4 +1,3 @@
-import {match} from "sinon";
 import Promise from "bluebird";
 
 import JoseService from "services/jose.service";
@@ -106,7 +105,7 @@ describe("AccountService", () => {
         expect(account).to.have.property("id");
         expect(account).to.have.property("kid", "key-42");
         expect(service.joseService.addKey).to.have.been.calledOnce
-          .and.to.have.been.calledWith(match.has("kid", "key-42"));
+          .and.to.have.been.calledWith(sinon.match.has("kid", "key-42"));
       })
     )));
   });

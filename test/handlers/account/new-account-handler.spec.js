@@ -1,4 +1,3 @@
-import {match} from "sinon";
 import Promise from "bluebird";
 import request from "request-promise";
 
@@ -61,11 +60,13 @@ describe("NewAccountHandler", () => {
       .then((res) => {
         expect(accountService.create).to.have.been.calledOnce;
         expect(accountService.create)
-          .to.have.been.calledWith(match.has("termsOfServiceAgreed", true));
+          .to.have.been.calledWith(sinon.match.has("termsOfServiceAgreed", true));
         expect(accountService.create)
-          .to.have.been.calledWith(match.has("contact", ["mailto:lala@lalaland.com"]));
+          .to.have.been.calledWith(sinon.match.has("contact", ["mailto:lala@lalaland.com"]));
         expect(accountService.create)
-          .to.have.been.calledWith(match.has("key", match.has("kid", "verified-key-42")));
+          .to.have.been.calledWith(
+            sinon.match.has("key", sinon.match.has("kid", "verified-key-42"))
+          );
       });
   }));
 

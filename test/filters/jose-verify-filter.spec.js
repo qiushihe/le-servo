@@ -1,4 +1,3 @@
-import {match} from "sinon";
 import {JWK} from "node-jose";
 import request from "request-promise";
 
@@ -59,7 +58,7 @@ describe("JoseVerifyFilter", () => {
           body: jws
         }).then(() => {
           expect(handler).to.have.been.calledOnce
-            .and.to.have.been.calledWith(match.has("body", {lala: "LALA"}))
+            .and.to.have.been.calledWith(sinon.match.has("body", {lala: "LALA"}))
             .and.to.have.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))
             .and.to.have.been.calledWith(matchHasDeep(
               "__leServoFilters.jose.verifiedNonce",
@@ -81,7 +80,7 @@ describe("JoseVerifyFilter", () => {
           body: {something: "else"}
         }).then(() => {
           expect(handler).to.have.been.calledOnce
-            .and.to.have.been.calledWith(match.has("body", {something: "else"}))
+            .and.to.have.been.calledWith(sinon.match.has("body", {something: "else"}))
             .and.to.have.not.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))
             .and.to.have.not.been.calledWith(matchHasDeep(
               "__leServoFilters.jose.verifiedNonce"

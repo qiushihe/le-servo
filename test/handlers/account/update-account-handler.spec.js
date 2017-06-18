@@ -1,4 +1,3 @@
-import {expect} from "chai";
 import Promise from "bluebird";
 import request from "request-promise";
 

@@ -1,4 +1,3 @@
-import {match} from "sinon";
 import request from "request-promise";
 
 import NonceService from "services/nonce.service";
