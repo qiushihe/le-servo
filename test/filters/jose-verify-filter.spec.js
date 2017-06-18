@@ -71,7 +71,7 @@ describe("JoseVerifyFilter", () => {
     server.getReady()
       .then(() => promisedKey)
       .then(sign(header, payload, {hasJwk: true, hasKid: false}))
-      .then((jws) => (
+      .then(() => (
         request({
           uri: `http://localhost:${server.getPort()}/lala`,
           method: "POST",

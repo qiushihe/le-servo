@@ -5,7 +5,7 @@ import isArray from "lodash/fp/isArray";
 const matchHasDeep = (path, value = null) => {
   const [part, ...restParts] = isArray(path) ? path : path.split(".");
   if (isEmpty(restParts)) {
-    return !!value
+    return value
       ? _sinon.match.has(part, value)
       : _sinon.match.has(part);
   } else {

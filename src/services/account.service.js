@@ -1,4 +1,3 @@
-import Promise from "bluebird";
 import uuidV4 from "uuid/v4";
 
 class AccountService {

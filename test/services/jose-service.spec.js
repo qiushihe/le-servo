@@ -1,6 +1,4 @@
-import {JWK, JWS} from "node-jose";
-import get from "lodash/fp/get";
-import Promise from "bluebird";
+import {JWK} from "node-jose";
 
 import JoseService from "services/jose.service";
 

@@ -57,7 +57,7 @@ describe("NewAccountHandler", () => {
           }
         })
       ))
-      .then((res) => {
+      .then(() => {
         expect(accountService.create).to.have.been.calledOnce;
         expect(accountService.create)
           .to.have.been.calledWith(sinon.match.has("termsOfServiceAgreed", true));

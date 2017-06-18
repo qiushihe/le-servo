@@ -29,9 +29,9 @@ describe("UpdateAccountHandler", () => {
     };
 
     accountService = {
-      get: (_) => Promise.resolve({...dummyAccount}),
+      get: () => Promise.resolve({...dummyAccount}),
       update: (_, payload) => Promise.resolve({...dummyAccount, ...payload}),
-      deactivate: (_) => Promise.resolve({...dummyAccount, status: "deactivated"})
+      deactivate: () => Promise.resolve({...dummyAccount, status: "deactivated"})
     };
 
     sandbox.spy(accountService, "update");
