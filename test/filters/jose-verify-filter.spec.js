@@ -1,13 +1,13 @@
 import {JWK} from "node-jose";
 import request from "request-promise";
 
-import JoseService from "services/jose.service";
-import joseVerify from "filters/jose-verify.filter";
+import JoseService from "src/services/jose.service";
+import joseVerify from "src/filters/jose-verify.filter";
 
-import echo from "../helpers/echo.handler";
-import {getServer} from "../helpers/server.helper";
-import {async} from "../helpers/test.helper";
-import {signWithJws as sign} from "../helpers/jws.helper";
+import echo from "test/helpers/echo.handler";
+import {getServer} from "test/helpers/server.helper";
+import {async} from "test/helpers/test.helper";
+import {signWithJws as sign} from "test/helpers/jws.helper";
 
 describe("JoseVerifyFilter", () => {
   let sandbox;

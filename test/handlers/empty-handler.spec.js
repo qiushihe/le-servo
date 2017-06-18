@@ -1,9 +1,9 @@
 import request from "request-promise";
 
-import empty from "handlers/empty.handler";
+import empty from "src/handlers/empty.handler";
 
-import {getServer} from "../helpers/server.helper";
-import {async} from "../helpers/test.helper";
+import {getServer} from "test/helpers/server.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("EmptyHandler", () => {
   let server;

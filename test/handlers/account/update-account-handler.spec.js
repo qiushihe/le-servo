@@ -1,10 +1,10 @@
 import Promise from "bluebird";
 import request from "request-promise";
 
-import updateAccount from "handlers/account/update-account.handler";
+import updateAccount from "src/handlers/account/update-account.handler";
 
-import {getServer} from "../../helpers/server.helper";
-import {async} from "../../helpers/test.helper";
+import {getServer} from "test/helpers/server.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("UpdateAccountHandler", () => {
   let sandbox;

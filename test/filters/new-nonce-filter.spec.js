@@ -1,11 +1,11 @@
 import request from "request-promise";
 
-import NonceService from "services/nonce.service";
-import newNonce from "filters/new-nonce.filter";
+import NonceService from "src/services/nonce.service";
+import newNonce from "src/filters/new-nonce.filter";
 
-import echo from "../helpers/echo.handler";
-import {getServer} from "../helpers/server.helper";
-import {async} from "../helpers/test.helper";
+import echo from "test/helpers/echo.handler";
+import {getServer} from "test/helpers/server.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("NewNonceFilter", () => {
   let sandbox;

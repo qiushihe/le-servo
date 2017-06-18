@@ -1,6 +1,6 @@
-import CollectionService from "services/collection.service";
+import CollectionService from "src/services/collection.service";
 
-import {async} from "../helpers/test.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("CollectionService", () => {
   let service;

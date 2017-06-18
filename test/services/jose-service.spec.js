@@ -1,9 +1,9 @@
 import {JWK} from "node-jose";
 
-import JoseService from "services/jose.service";
+import JoseService from "src/services/jose.service";
 
-import {async} from "../helpers/test.helper";
-import {signWithJws as sign} from "../helpers/jws.helper";
+import {async} from "test/helpers/test.helper";
+import {signWithJws as sign} from "test/helpers/jws.helper";
 
 describe("JoseService", () => {
   let sandbox;

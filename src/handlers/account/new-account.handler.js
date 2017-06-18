@@ -1,6 +1,6 @@
 import get from "lodash/fp/get";
 
-import {getJoseVerifiedKey} from "helpers/request.helper";
+import {getJoseVerifiedKey} from "src/helpers/request.helper";
 
 const getRequestOnlyReturnExisting = get("body.only-return-existing");
 const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");

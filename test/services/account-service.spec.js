@@ -1,10 +1,10 @@
 import Promise from "bluebird";
 
-import JoseService from "services/jose.service";
-import CollectionService from "services/collection.service";
-import AccountService from "services/account.service";
+import JoseService from "src/services/jose.service";
+import CollectionService from "src/services/collection.service";
+import AccountService from "src/services/account.service";
 
-import {async} from "../helpers/test.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("AccountService", () => {
   let sandbox;

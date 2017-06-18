@@ -1,4 +1,4 @@
-import DirectoryService from "services/directory.service";
+import DirectoryService from "src/services/directory.service";
 
 describe("DirectoryService", () => {
   let sandbox;

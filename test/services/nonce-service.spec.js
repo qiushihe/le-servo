@@ -1,10 +1,10 @@
 import Promise from "bluebird";
 import uuidV4 from "uuid/v4";
 
-import NonceService from "services/nonce.service";
-import {isValid} from "helpers/nonce.helper";
+import NonceService from "src/services/nonce.service";
+import {isValid} from "src/helpers/nonce.helper";
 
-import {async} from "../helpers/test.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("NonceService", () => {
   let service;

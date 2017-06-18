@@ -1,10 +1,10 @@
 import Promise from "bluebird";
 import request from "request-promise";
 
-import newAccount from "handlers/account/new-account.handler";
+import newAccount from "src/handlers/account/new-account.handler";
 
-import {getServer} from "../../helpers/server.helper";
-import {async} from "../../helpers/test.helper";
+import {getServer} from "test/helpers/server.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("NewAccountHandler", () => {
   let sandbox;

@@ -2,7 +2,7 @@ import get from "lodash/fp/get";
 import omitBy from "lodash/fp/omitBy";
 import isEmpty from "lodash/fp/isEmpty";
 
-import {getJoseVerifiedKey} from "helpers/request.helper";
+import {getJoseVerifiedKey} from "src/helpers/request.helper";
 
 const getRequestAccountId = get("params.accound_id");
 const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");

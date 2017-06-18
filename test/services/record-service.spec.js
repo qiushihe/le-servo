@@ -1,6 +1,6 @@
-import RecordService from "services/record.service";
+import RecordService from "src/services/record.service";
 
-import {async} from "../helpers/test.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("RecordService", () => {
   let service;
