@@ -1,28 +1,21 @@
 import {expect} from "chai";
-import express from "express";
-import bodyParser from "body-parser";
 import Promise from "bluebird";
 import request from "request-promise";
 
 import updateAccount from "handlers/account/update-account.handler";
 
-import {getRansomPort} from "../../helpers/server.helper";
+import {getServer} from "../../helpers/server.helper";
 import {async} from "../../helpers/test.helper";
 
 describe("UpdateAccountHandler", () => {
   let sandbox;
-  let port;
   let server;
-  let serverReady;
   let dummyAccount;
   let accountService;
   let directoryService;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-
-    port = getRansomPort();
-    server = express();
 
     dummyAccount = {
       status: "valid",
@@ -45,27 +38,28 @@ describe("UpdateAccountHandler", () => {
     sandbox.spy(accountService, "update");
     sandbox.spy(accountService, "deactivate");
 
-    server.use(bodyParser.json());
-    server.use((req, _, next) => {
-      req.__leServoFilters = {jose: {verifiedKey: {kid: "verified-key-42", alg: "some-alg"}}};
-      next();
-    });
-    server.post("/accounts/:accound_id", updateAccount({accountService, directoryService}));
-
-    serverReady = new Promise((resolve) => {
-      server.listen(port, resolve);
+    server = getServer({
+      parser: "json",
+      setup: (server) => {
+        server.use((req, _, next) => {
+          req.__leServoFilters = {jose: {verifiedKey: {kid: "verified-key-42", alg: "some-alg"}}};
+          next();
+        });
+        server.post("/accounts/:accound_id", updateAccount({accountService, directoryService}));
+      }
     });
   });
 
-  afterEach(() => {
+  afterEach((done) => {
     sandbox.restore();
+    server.close(done);
   });
 
   it("should respond with account JSON and location header", async(() => {
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/accounts/42`,
+          uri: `http://localhost:${server.getPort()}/accounts/42`,
           method: "POST",
           json: true,
           body: {},
@@ -84,10 +78,10 @@ describe("UpdateAccountHandler", () => {
   }));
 
   it("should call account service to update account", async(() => {
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/accounts/42`,
+          uri: `http://localhost:${server.getPort()}/accounts/42`,
           method: "POST",
           json: true,
           body: {
@@ -104,10 +98,10 @@ describe("UpdateAccountHandler", () => {
   }));
 
   it("should call account service to deactivate account", async(() => {
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/accounts/42`,
+          uri: `http://localhost:${server.getPort()}/accounts/42`,
           method: "POST",
           json: true,
           body: {
@@ -125,10 +119,10 @@ describe("UpdateAccountHandler", () => {
   it("should not accept account with mis-matching key", async(() => {
     dummyAccount.kid = "a-different-key-42";
 
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/accounts/42`,
+          uri: `http://localhost:${server.getPort()}/accounts/42`,
           method: "POST",
           json: true,
           body: {"contact": ["mailto:lala2@lalaland.com"]}
@@ -151,10 +145,10 @@ describe("UpdateAccountHandler", () => {
   it("should not accept deactivated account", async(() => {
     dummyAccount.status = "deactivated";
 
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/accounts/42`,
+          uri: `http://localhost:${server.getPort()}/accounts/42`,
           method: "POST",
           json: true,
           body: {"contact": ["mailto:lala2@lalaland.com"]}

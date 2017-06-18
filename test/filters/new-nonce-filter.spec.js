@@ -1,47 +1,43 @@
 import {match} from "sinon";
-import express from "express";
-import Promise from "bluebird";
 import request from "request-promise";
 
 import NonceService from "services/nonce.service";
 import newNonce from "filters/new-nonce.filter";
 
 import echo from "../helpers/echo.handler";
-import {getRansomPort} from "../helpers/server.helper";
+import {getServer} from "../helpers/server.helper";
 import {async} from "../helpers/test.helper";
 
 describe("NewNonceFilter", () => {
   let sandbox;
   let service;
-  let port;
   let server;
   let handler;
-  let serverReady;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     service = new NonceService({bufferSize: 32});
 
-    port = getRansomPort();
-    server = express();
     handler = sandbox.spy(echo);
 
-    server.use(newNonce({nonceService: service}));
-    server.all("/*", handler);
-
-    serverReady = new Promise((resolve) => {
-      server.listen(port, resolve);
+    server = getServer({
+      parser: "json",
+      setup: (server) => {
+        server.use(newNonce({nonceService: service}));
+        server.all("/*", handler);
+      }
     });
   });
 
-  afterEach(() => {
+  afterEach((done) => {
     sandbox.restore();
+    server.close(done);
   });
 
   it("should add replay-nonce header to GET responses", async(() => (
-    serverReady.then(() => (
+    server.getReady().then(() => (
       request({
-        uri: `http://localhost:${port}/lala`,
+        uri: `http://localhost:${server.getPort()}/lala`,
         method: "GET"
       }).then(() => {
         expect(handler).to.have.been.calledOnce;
@@ -52,9 +48,9 @@ describe("NewNonceFilter", () => {
   )));
 
   it("should add replay-nonce header to POST responses", async(() => (
-    serverReady.then(() => (
+    server.getReady().then(() => (
       request({
-        uri: `http://localhost:${port}/lala`,
+        uri: `http://localhost:${server.getPort()}/lala`,
         method: "POST",
         body: "LALA"
       }).then(() => {
@@ -66,9 +62,9 @@ describe("NewNonceFilter", () => {
   )));
 
   it("should add replay-nonce header to PUT responses", async(() => (
-    serverReady.then(() => (
+    server.getReady().then(() => (
       request({
-        uri: `http://localhost:${port}/lala`,
+        uri: `http://localhost:${server.getPort()}/lala`,
         method: "PUT",
         body: "LALA"
       }).then(() => {

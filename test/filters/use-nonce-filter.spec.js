@@ -1,4 +1,3 @@
-import express from "express";
 import Promise from "bluebird";
 import request from "request-promise";
 
@@ -6,24 +5,18 @@ import NonceService from "services/nonce.service";
 import useNonce from "filters/use-nonce.filter";
 
 import echo from "../helpers/echo.handler";
-import {getRansomPort} from "../helpers/server.helper";
+import {getServer} from "../helpers/server.helper";
 import {async} from "../helpers/test.helper";
 
 describe("UseNonceFilter", () => {
   let sandbox;
   let service;
   let useNonceStub;
-  let port;
-  let server;
-  let serverReady;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     service = new NonceService({bufferSize: 32});
     useNonceStub = sandbox.stub(service, "useNonce").returns(Promise.resolve());
-
-    port = getRansomPort();
-    server = express();
   });
 
   afterEach(() => {
@@ -31,23 +24,30 @@ describe("UseNonceFilter", () => {
   });
 
   describe("with verified nonce", () => {
-    beforeEach(() => {
-      server.use((req, _, next) => {
-        req.__leServoFilters = {jose: {verifiedNonce: "42"}};
-        next();
-      });
-      server.use(useNonce({nonceService: service}));
-      server.all("/*", echo);
+    let server;
 
-      serverReady = new Promise((resolve) => {
-        server.listen(port, resolve);
+    beforeEach(() => {
+      server = getServer({
+        parser: "json",
+        setup: (server) => {
+          server.use((req, _, next) => {
+            req.__leServoFilters = {jose: {verifiedNonce: "42"}};
+            next();
+          });
+          server.use(useNonce({nonceService: service}));
+          server.all("/*", echo);
+        }
       });
     });
 
+    afterEach((done) => {
+      server.close(done);
+    });
+
     it("should use verified nonce", async(() => (
-      serverReady.then(() => (
+      server.getReady().then(() => (
         request({
-          uri: `http://localhost:${port}/lala`,
+          uri: `http://localhost:${server.getPort()}/lala`,
           method: "GET"
         }).then(() => {
           expect(useNonceStub).to.have.been.calledOnce
@@ -58,19 +58,26 @@ describe("UseNonceFilter", () => {
   });
 
   describe("without verified nonce", () => {
-    beforeEach(() => {
-      server.use(useNonce({nonceService: service}));
-      server.all("/*", echo);
+    let server;
 
-      serverReady = new Promise((resolve) => {
-        server.listen(port, resolve);
+    beforeEach(() => {
+      server = getServer({
+        parser: "json",
+        setup: (server) => {
+          server.use(useNonce({nonceService: service}));
+          server.all("/*", echo);
+        }
       });
     });
 
+    afterEach((done) => {
+      server.close(done);
+    });
+
     it("should not use nonce", async(() => (
-      serverReady.then(() => (
+      server.getReady().then(() => (
         request({
-          uri: `http://localhost:${port}/lala`,
+          uri: `http://localhost:${server.getPort()}/lala`,
           method: "GET"
         }).then(() => {
           expect(useNonceStub).to.have.not.been.called;

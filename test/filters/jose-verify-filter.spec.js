@@ -1,15 +1,12 @@
 import {match} from "sinon";
 import {JWK} from "node-jose";
-import express from "express";
-import bodyParser from "body-parser";
-import Promise from "bluebird";
 import request from "request-promise";
 
 import JoseService from "services/jose.service";
 import joseVerify from "filters/jose-verify.filter";
 
 import echo from "../helpers/echo.handler";
-import {getRansomPort} from "../helpers/server.helper";
+import {getServer} from "../helpers/server.helper";
 import {async} from "../helpers/test.helper";
 import {signWithJws as sign} from "../helpers/jws.helper";
 import {matchHasDeep} from "../helpers/match.helper";
@@ -21,10 +18,8 @@ describe("JoseVerifyFilter", () => {
   let payload;
   let keystore;
   let promisedKey;
-  let port;
   let server;
   let handler;
-  let serverReady;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -36,30 +31,29 @@ describe("JoseVerifyFilter", () => {
     keystore = JWK.createKeyStore();
     promisedKey = keystore.generate("EC", "P-256");
 
-    port = getRansomPort();
-    server = express();
     handler = sandbox.spy(echo);
 
-    server.use(bodyParser.json());
-    server.use(joseVerify({joseService: service}));
-    server.all("/*", handler);
-
-    serverReady = new Promise((resolve) => {
-      server.listen(port, resolve);
+    server = getServer({
+      parser: "json",
+      setup: (server) => {
+        server.use(joseVerify({joseService: service}));
+        server.all("/*", handler);
+      }
     });
   });
 
-  afterEach(() => {
+  afterEach((done) => {
     sandbox.restore();
+    server.close(done);
   });
 
   it("should should extract JWS payload", async(() => (
-    serverReady
+    server.getReady()
       .then(() => promisedKey)
       .then(sign(header, payload, {hasJwk: true, hasKid: false}))
       .then((jws) => (
         request({
-          uri: `http://localhost:${port}/lala`,
+          uri: `http://localhost:${server.getPort()}/lala`,
           method: "POST",
           json: true,
           body: jws
@@ -76,12 +70,12 @@ describe("JoseVerifyFilter", () => {
   )));
 
   it("should should preserve none JWS request body", async(() => (
-    serverReady
+    server.getReady()
       .then(() => promisedKey)
       .then(sign(header, payload, {hasJwk: true, hasKid: false}))
       .then((jws) => (
         request({
-          uri: `http://localhost:${port}/lala`,
+          uri: `http://localhost:${server.getPort()}/lala`,
           method: "POST",
           json: true,
           body: {something: "else"}

@@ -2,29 +2,29 @@ import request from "request-promise";
 
 import empty from "handlers/empty.handler";
 
-import {getServer, getRansomPort} from "../helpers/server.helper";
+import {getServer} from "../helpers/server.helper";
 import {async} from "../helpers/test.helper";
 
 describe("EmptyHandler", () => {
-  let port;
-  let serverReady;
+  let server;
 
   beforeEach(() => {
-    const server = getServer({
-      port: getRansomPort(),
-      bodyParser: "json",
+    server = getServer({
+      parser: "json",
       setup: (server) => {
         server.all("/lala", empty);
       }
     });
-    port = server.port;
-    serverReady = server.ready;
+  });
+
+  afterEach((done) => {
+    server.close(done);
   });
 
   it("should respond with 204 no content", async(() => (
-    serverReady.then(() => (
+    server.getReady().then(() => (
       request({
-        uri: `http://localhost:${port}/lala`,
+        uri: `http://localhost:${server.getPort()}/lala`,
         method: "GET",
         resolveWithFullResponse: true
       }).then((res) => {
