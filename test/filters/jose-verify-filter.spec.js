@@ -8,7 +8,6 @@ import echo from "../helpers/echo.handler";
 import {getServer} from "../helpers/server.helper";
 import {async} from "../helpers/test.helper";
 import {signWithJws as sign} from "../helpers/jws.helper";
-import {matchHasDeep} from "../helpers/match.helper";
 
 describe("JoseVerifyFilter", () => {
   let sandbox;
@@ -59,8 +58,8 @@ describe("JoseVerifyFilter", () => {
         }).then(() => {
           expect(handler).to.have.been.calledOnce
             .and.to.have.been.calledWith(sinon.match.has("body", {lala: "LALA"}))
-            .and.to.have.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))
-            .and.to.have.been.calledWith(matchHasDeep(
+            .and.to.have.been.calledWith(sinon.matchHasDeep("__leServoFilters.jose.verifiedKey"))
+            .and.to.have.been.calledWith(sinon.matchHasDeep(
               "__leServoFilters.jose.verifiedNonce",
               "lala"
             ));
@@ -81,8 +80,8 @@ describe("JoseVerifyFilter", () => {
         }).then(() => {
           expect(handler).to.have.been.calledOnce
             .and.to.have.been.calledWith(sinon.match.has("body", {something: "else"}))
-            .and.to.have.not.been.calledWith(matchHasDeep("__leServoFilters.jose.verifiedKey"))
-            .and.to.have.not.been.calledWith(matchHasDeep(
+            .and.to.have.not.been.calledWith(sinon.matchHasDeep("__leServoFilters.jose.verifiedKey"))
+            .and.to.have.not.been.calledWith(sinon.matchHasDeep(
               "__leServoFilters.jose.verifiedNonce"
             ));
         })

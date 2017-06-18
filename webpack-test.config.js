@@ -13,7 +13,8 @@ module.exports = {
       "node_modules"
     ],
     alias: {
-      "chai.provider": path.resolve(__dirname, "test/providers/chai.provider.js")
+      "chai.provider": path.resolve(__dirname, "test/providers/chai.provider.js"),
+      "sinon.provider": path.resolve(__dirname, "test/providers/sinon.provider.js")
     }
   },
   module: {
@@ -27,7 +28,7 @@ module.exports = {
     new webpack.ProvidePlugin({
       chai: ["chai.provider", "default"],
       expect: ["chai", "expect"],
-      sinon: "sinon"
+      sinon: ["sinon.provider", "default"]
     })
   ],
   output: {
