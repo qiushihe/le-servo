@@ -1,15 +1,10 @@
-import chai, {expect} from "chai";
-import sinon, {match} from "sinon";
-import sinonChai from "sinon-chai";
 import Promise from "bluebird";
 
-import JoseService from "services/jose.service";
-import CollectionService from "services/collection.service";
-import AccountService from "services/account.service";
+import JoseService from "src/services/jose.service";
+import CollectionService from "src/services/collection.service";
+import AccountService from "src/services/account.service";
 
-import {async} from "../helpers/test.helper";
-
-chai.use(sinonChai);
+import {async} from "test/helpers/test.helper";
 
 describe("AccountService", () => {
   let sandbox;
@@ -110,7 +105,7 @@ describe("AccountService", () => {
         expect(account).to.have.property("id");
         expect(account).to.have.property("kid", "key-42");
         expect(service.joseService.addKey).to.have.been.calledOnce
-          .and.to.have.been.calledWith(match.has("kid", "key-42"));
+          .and.to.have.been.calledWith(sinon.match.has("kid", "key-42"));
       })
     )));
   });

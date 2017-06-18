@@ -1,16 +1,9 @@
-import chai, {expect} from "chai";
-import sinon from "sinon";
-import sinonChai from "sinon-chai";
-import {JWK, JWS} from "node-jose";
-import get from "lodash/fp/get";
-import Promise from "bluebird";
+import {JWK} from "node-jose";
 
-import JoseService from "services/jose.service";
+import JoseService from "src/services/jose.service";
 
-import {async} from "../helpers/test.helper";
-import {signWithJws as sign} from "../helpers/jws.helper";
-
-chai.use(sinonChai);
+import {async} from "test/helpers/test.helper";
+import {signWithJws as sign} from "test/helpers/jws.helper";
 
 describe("JoseService", () => {
   let sandbox;

@@ -1,20 +1,20 @@
 import express from "express";
 import bodyParser from "body-parser";
 
-import NonceService from "services/nonce.service";
-import JoseService from "services/jose.service";
-import DirectoryService from "services/directory.service";
-import CollectionService from "services/collection.service";
-import AccountService from "services/account.service";
+import NonceService from "src/services/nonce.service";
+import JoseService from "src/services/jose.service";
+import DirectoryService from "src/services/directory.service";
+import CollectionService from "src/services/collection.service";
+import AccountService from "src/services/account.service";
 
-import newNonce from "filters/new-nonce.filter";
-import joseVerify from "filters/jose-verify.filter";
-import useNonce from "filters/use-nonce.filter";
+import newNonce from "src/filters/new-nonce.filter";
+import joseVerify from "src/filters/jose-verify.filter";
+import useNonce from "src/filters/use-nonce.filter";
 
-import empty from "handlers/empty.handler";
-import directory from "handlers/directory.handler";
-import newAccount from "handlers/account/new-account.handler";
-import updateAccount from "handlers/account/update-account.handler";
+import empty from "src/handlers/empty.handler";
+import directory from "src/handlers/directory.handler";
+import newAccount from "src/handlers/account/new-account.handler";
+import updateAccount from "src/handlers/account/update-account.handler";
 
 const nonceService = new NonceService({bufferSize: 32});
 const joseService = new JoseService();
@@ -65,5 +65,5 @@ directoryService.each((_, {method, path, handler}) => {
 server.post("/accounts/:accound_id", updateAccount({directoryService, accountService}));
 
 server.listen(port, () => {
-  console.log(`Server started on port ${port}`);
+  console.log(`Server started on port ${port}`); // eslint-disable-line
 });

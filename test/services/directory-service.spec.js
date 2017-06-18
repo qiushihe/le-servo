@@ -1,10 +1,4 @@
-import chai, {expect} from "chai";
-import sinon, {match} from "sinon";
-import sinonChai from "sinon-chai";
-
-import DirectoryService from "services/directory.service";
-
-chai.use(sinonChai);
+import DirectoryService from "src/services/directory.service";
 
 describe("DirectoryService", () => {
   let sandbox;
@@ -45,11 +39,11 @@ describe("DirectoryService", () => {
       service.each(iterator);
 
       expect(iterator).to.have.been.calledTwice;
-      expect(iterator.getCall(0)).to.have.been.calledWith("lala1", match({
-        method: "PUT", path: "/la-la1", handler: match.func
+      expect(iterator.getCall(0)).to.have.been.calledWith("lala1", sinon.match({
+        method: "PUT", path: "/la-la1", handler: sinon.match.func
       }));
-      expect(iterator.getCall(1)).to.have.been.calledWith("lala2", match({
-        method: "GET", path: "/la-la2", handler: match.func
+      expect(iterator.getCall(1)).to.have.been.calledWith("lala2", sinon.match({
+        method: "GET", path: "/la-la2", handler: sinon.match.func
       }));
     });
   });

@@ -8,7 +8,7 @@ export const getRansomPort = () => {
 
 export const getServer = ({
   port,
-  bodyParser: parser,
+  parser,
   setup
 }) => {
   const server = express();
@@ -19,10 +19,25 @@ export const getServer = ({
 
   setup(server);
 
+  let _listener;
+  const _port = port || getRansomPort();
+  const _ready = new Promise((resolve) => {
+    _listener = server.listen(_port, resolve);
+  });
+
   return {
-    port,
-    ready: new Promise((resolve) => {
-      server.listen(port, resolve);
-    })
+    getPort: () => {
+      return _port;
+    },
+    getReady: () => {
+      return _ready;
+    },
+    close: (done) => {
+      if (_listener) {
+        _listener.close(done);
+      } else {
+        done();
+      }
+    }
   };
 };

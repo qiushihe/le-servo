@@ -1,6 +1,25 @@
 {
   "presets": ["es2015"],
   "plugins": [
-    "transform-object-rest-spread"
-  ]
+    "transform-object-rest-spread",
+    ["babel-plugin-require-root-rewrite", {
+      "pattern": "^src",
+      "basePath": "server"
+    }]
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        ["babel-plugin-require-root-rewrite", {
+          "pattern": "^test",
+          "basePath": "test"
+        }],
+        ["provide-modules", {
+          "chai": ["expect"],
+          "test/providers/chai.provider.js": "chai",
+          "test/providers/sinon.provider.js": "sinon"
+        }]
+      ]
+    }
+  }
 }

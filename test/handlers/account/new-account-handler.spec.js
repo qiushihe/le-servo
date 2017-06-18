@@ -1,25 +1,16 @@
-import chai, {expect} from "chai";
-import sinon, {match} from "sinon";
-import sinonChai from "sinon-chai";
-import express from "express";
-import bodyParser from "body-parser";
 import Promise from "bluebird";
 import request from "request-promise";
 
-import newAccount from "handlers/account/new-account.handler";
+import newAccount from "src/handlers/account/new-account.handler";
 
-import {getRansomPort} from "../../helpers/server.helper";
-import {async} from "../../helpers/test.helper";
-
-chai.use(sinonChai);
+import {getServer} from "test/helpers/server.helper";
+import {async} from "test/helpers/test.helper";
 
 describe("NewAccountHandler", () => {
   let sandbox;
   let directoryService;
   let accountService;
-  let port;
   let server;
-  let serverReady;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -33,33 +24,31 @@ describe("NewAccountHandler", () => {
       create: sandbox.stub()
     };
 
-    port = getRansomPort();
-    server = express();
-
-    server.use(bodyParser.json());
-    server.use((req, _, next) => {
-      req.__leServoFilters = {jose: {verifiedKey: {kid: "verified-key-42", alg: "some-alg"}}};
-      next();
-    });
-    server.post("/new-account", newAccount({directoryService, accountService}));
-
-    serverReady = new Promise((resolve) => {
-      server.listen(port, resolve);
+    server = getServer({
+      parser: "json",
+      setup: (server) => {
+        server.use((req, _, next) => {
+          req.__leServoFilters = {jose: {verifiedKey: {kid: "verified-key-42", alg: "some-alg"}}};
+          next();
+        });
+        server.post("/new-account", newAccount({directoryService, accountService}));
+      }
     });
   });
 
-  afterEach(() => {
+  afterEach((done) => {
     sandbox.restore();
+    server.close(done);
   });
 
   it("should call account service to create account", async(() => {
     accountService.find.returns(Promise.resolve(null));
     accountService.create.returns(Promise.resolve({id: "42"}));
 
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/new-account`,
+          uri: `http://localhost:${server.getPort()}/new-account`,
           method: "POST",
           json: true,
           body: {
@@ -68,14 +57,16 @@ describe("NewAccountHandler", () => {
           }
         })
       ))
-      .then((res) => {
+      .then(() => {
         expect(accountService.create).to.have.been.calledOnce;
         expect(accountService.create)
-          .to.have.been.calledWith(match.has("termsOfServiceAgreed", true));
+          .to.have.been.calledWith(sinon.match.has("termsOfServiceAgreed", true));
         expect(accountService.create)
-          .to.have.been.calledWith(match.has("contact", ["mailto:lala@lalaland.com"]));
+          .to.have.been.calledWith(sinon.match.has("contact", ["mailto:lala@lalaland.com"]));
         expect(accountService.create)
-          .to.have.been.calledWith(match.has("key", match.has("kid", "verified-key-42")));
+          .to.have.been.calledWith(
+            sinon.match.has("key", sinon.match.has("kid", "verified-key-42"))
+          );
       });
   }));
 
@@ -88,10 +79,10 @@ describe("NewAccountHandler", () => {
       id: "42"
     }));
 
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/new-account`,
+          uri: `http://localhost:${server.getPort()}/new-account`,
           method: "POST",
           json: true,
           body: {
@@ -114,10 +105,10 @@ describe("NewAccountHandler", () => {
 
   it("should respond with 404 when no account is found with only-return-existing", async(() => {
     accountService.find.returns(Promise.resolve(null));
-    return serverReady
+    return server.getReady()
       .then(() => (
         request({
-          uri: `http://localhost:${port}/new-account`,
+          uri: `http://localhost:${server.getPort()}/new-account`,
           method: "POST",
           json: true,
           body: {

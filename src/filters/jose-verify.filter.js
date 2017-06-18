@@ -1,5 +1,6 @@
 import isEmpty from "lodash/fp/isEmpty";
-import {getJson} from "helpers/json.helper";
+
+import {getJson} from "src/helpers/json.helper";
 
 export default ({joseService}) => (req, _, next) => {
   const requestBody = getJson(req.body);
