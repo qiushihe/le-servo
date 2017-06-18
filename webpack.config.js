@@ -1,3 +1,4 @@
+var nodeExternals = require("webpack-node-externals");
 var path = require("path");
 var glob = require("glob");
 
@@ -20,9 +21,10 @@ module.exports = {
     }]
   },
   output: {
-    path: path.resolve(__dirname, "lib"),
+    path: path.resolve(__dirname, "build"),
     filename: "[name].js",
     chunkFilename: "[id].js"
   },
-  target: "node"
+  target: "node",
+  externals: [nodeExternals()]
 };

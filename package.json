@@ -2,13 +2,13 @@
   "name": "le-servo",
   "version": "0.0.1",
   "description": "Simple Let's Encrypt Server",
-  "main": "lib/server.js",
+  "main": "build/server.js",
   "scripts": {
     "build": "./node_modules/.bin/webpack --progress --config webpack.config.js",
     "build-test": "./node_modules/.bin/webpack --progress --config webpack-test.config.js",
-    "server": "node ./lib/server.js",
+    "server": "node ./build/server.js",
     "lint": "./node_modules/.bin/eslint src/** test/**",
-    "test": "npm run lint && npm run build-test && ./node_modules/mocha/bin/mocha lib/test.js",
+    "test": "npm run lint && npm run build-test && ./node_modules/mocha/bin/mocha build/test.js",
     "dev": "npm run build && npm run server"
   },
   "repository": "https://github.com/qiushihe/le-servo",
@@ -34,7 +34,8 @@
     "sinon": "^2.2.0",
     "sinon-chai": "^2.10.0",
     "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.4.1"
+    "webpack-dev-server": "^2.4.1",
+    "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
