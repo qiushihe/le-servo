@@ -35,7 +35,7 @@ export default ({
       status: account.status,
       contact: account.contact,
       "terms-of-service-agreed": account.termsOfServiceAgreed,
-      orders: "http://TODO" // TODO: Get orders URL
+      orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
     })).end();
   }).catch(({message}) => {
     if (message === "Account not found") {

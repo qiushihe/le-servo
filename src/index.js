@@ -28,6 +28,17 @@ const collectionService = new CollectionService({
       {name: "termsOfServiceAgreed", defaultValue: false},
       {name: "kid", defaultValue: null}
     ]
+  }, {
+    name: "orders",
+    attributes: [
+      {name: "accountId", defaultValue: null},
+      {name: "status", defaultValue: "pending"},
+      {name: "expires", defaultValue: null},
+      {name: "csr", defaultValue: null},
+      {name: "notBefore", defaultValue: null},
+      {name: "notAfter", defaultValue: null},
+      {name: "error", defaultValue: null}
+    ]
   }]
 });
 
