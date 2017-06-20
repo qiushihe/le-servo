@@ -11,6 +11,13 @@ const stringReplace = (search, replacement) => (str) => str.replace(search, repl
 const stringToLowerCase = (str) => str.toLowerCase();
 const padMod4 = (pad) => (str) => (str.length % 4 !== 0 ? padMod4(pad)(`${str}=`) : str);
 
+// There is probably a better regexp somewhere but for now this one would do.
+// It matches:
+//   (one or more of ((one or more of not a ".") followed by a "."))
+//   followed by (one or more of not a ".")
+// ... which is good enough for now.
+const domainRegExp = new RegExp("^([^\\.]+\\.)+([^\\.]+)$");
+
 export const parseCsr = (encodedCsr) => Promise.resolve().then(() => {
   const pem = flow([
     // Normalize encoded CSR string into base64 encoding
@@ -45,5 +52,8 @@ export const parseCsr = (encodedCsr) => Promise.resolve().then(() => {
     map("value")
   ])(attributes);
 
-  return uniq([...commonNames, ...extensionNames]);
+  return flow([
+    uniq,
+    filter((domain) => domainRegExp.test(domain))
+  ])([...commonNames, ...extensionNames]);
 });
