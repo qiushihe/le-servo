@@ -5,8 +5,8 @@
   "main": "build/server/index.js",
   "scripts": {
     "eslint": "eslint src/** test/**",
-    "build": "rm -fr build/server && babel src --out-dir build/server",
-    "build-test": "npm run build && rm -fr build/test && BABEL_ENV=test babel test --out-dir build/test",
+    "build": "rm -fr build/server && babel src --source-maps --out-dir build/server",
+    "build-test": "npm run build && rm -fr build/test && BABEL_ENV=test babel test --source-maps --out-dir build/test",
     "server": "npm run build && node ./build/server/index.js",
     "test": "npm run eslint && npm run build-test && mocha --recursive build/test"
   },
