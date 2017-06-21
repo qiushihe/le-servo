@@ -39,6 +39,27 @@ const collectionService = new CollectionService({
       {name: "notAfter", defaultValue: null},
       {name: "error", defaultValue: null}
     ]
+  }, {
+    name: "authorizations",
+    attributes: [
+      {name: "orderId", defaultValue: null},
+      {name: "identifierType", defaultValue: "dns"},
+      {name: "identifierValue", defaultValue: null},
+      {name: "status", defaultValue: "pending"},
+      {name: "expires", defaultValue: null},
+      {name: "token", defaultValue: null}
+    ]
+  }, {
+    name: "challenges",
+    attributes: [
+      {name: "authorizationId", defaultValue: null},
+      {name: "type", defaultValue: null},
+      {name: "url", defaultValue: null},
+      {name: "status", defaultValue: "pending"},
+      {name: "validated", defaultValue: null},
+      {name: "keyAuthorization", defaultValue: null},
+      {name: "error", defaultValue: null}
+    ]
   }]
 });
 

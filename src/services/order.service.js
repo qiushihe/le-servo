@@ -1,4 +1,8 @@
 import uuidV4 from "uuid/v4";
+import map from "lodash/fp/map";
+import Promise from "bluebird";
+
+import {parseCsr} from "src/helpers/csr.helper";
 
 class OrderService {
   constructor(options = {}) {
@@ -6,7 +10,12 @@ class OrderService {
       throw new Error("Missing storage service");
     }
 
+    if (!options.authorizationService) {
+      throw new Error("Missing authorization service");
+    }
+
     this.storage = options.storage;
+    this.authorizationService = options.authorizationService;
   }
 
   find(query) {
@@ -25,6 +34,16 @@ class OrderService {
     return this.storage.get("orders").then((orders) => {
       return orders.create(uuidV4()).then(({id}) => {
         return orders.update(id, {accountId, csr, notBefore, notAfter});
+      }).then(({id}) => {
+        return flow([
+          parseCsr,
+          map((domain) => this.authorizationService.create({
+            orderId: id,
+            identifierValue: domain,
+            token: uuidV4().replace(/-/g, "")
+          })),
+          (promises) => Promise.all(promises)
+        ])(csr);
       });
     });
   }
