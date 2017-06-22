@@ -6,6 +6,7 @@ import OrderService from "src/services/order.service";
 import {async} from "test/helpers/test.helper";
 
 import lalaDotCom from "test/fixtures/csr-base64url/lala.com";
+import notExampleDotCom from "test/fixtures/csr-base64url/not-example.com";
 
 describe("OrderService", () => {
   let sandbox;
@@ -88,8 +89,7 @@ describe("OrderService", () => {
   describe("#create()", () => {
     it("should create new order", async(() => (
       service.create({
-        accountId: "account42",
-        csr: lalaDotCom
+        accountId: "account42", csr: lalaDotCom
       })
       .then((order) => {
         expect(order).to.have.property("id");
@@ -101,6 +101,15 @@ describe("OrderService", () => {
             token: sinon.match.string,
             identifierValue: "lala.com"
           }));
+      })
+    )));
+
+    it("should create as many authorization as the number of domains in the CSR", async(() => (
+      service.create({
+        accountId: "account42", csr: notExampleDotCom
+      })
+      .then(() => {
+        expect(service.authorizationService.create).to.have.been.calledTwice;
       })
     )));
   });

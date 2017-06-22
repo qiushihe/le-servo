@@ -6,7 +6,12 @@ class AuthorizationService {
       throw new Error("Missing storage service");
     }
 
+    if (!options.challengeService) {
+      throw new Error("Missing challenge service");
+    }
+
     this.storage = options.storage;
+    this.challengeService = options.challengeService;
   }
 
   find(query) {
@@ -22,14 +27,19 @@ class AuthorizationService {
   }
 
   create({orderId, identifierType, identifierValue, status, expires, token}) {
-    // TODO: Create HTTP challange
-
     return this.storage.get("authorizations").then((authorizations) => {
       return authorizations.create(uuidV4()).then(({id}) => {
         return authorizations.update(id, {
           orderId, identifierType, identifierValue, status, expires, token
         });
       });
+    }).then((authorization) => {
+      return this.challengeService.create({
+        authorizationId: authorization.id,
+        type: "http-01",
+        token: authorization.token
+      })
+      .then(() => authorization);
     });
   }
 
