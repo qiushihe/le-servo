@@ -30,12 +30,10 @@ describe("UpdateAccountHandler", () => {
 
     accountService = {
       get: () => Promise.resolve({...dummyAccount}),
-      update: (_, payload) => Promise.resolve({...dummyAccount, ...payload}),
-      deactivate: () => Promise.resolve({...dummyAccount, status: "deactivated"})
+      update: (_, payload) => Promise.resolve({...dummyAccount, ...payload})
     };
 
     sandbox.spy(accountService, "update");
-    sandbox.spy(accountService, "deactivate");
 
     server = getServer({
       parser: "json",
@@ -109,8 +107,8 @@ describe("UpdateAccountHandler", () => {
         })
       ))
       .then((res) => {
-        expect(accountService.deactivate).to.have.been.calledOnce
-          .and.to.have.been.calledWith("42");
+        expect(accountService.update).to.have.been.calledOnce
+          .and.to.have.been.calledWith("42", {status: "deactivated"});
         expect(res).to.have.property("status", "deactivated");
       });
   }));

@@ -34,16 +34,16 @@ class OrderService {
     return this.storage.get("orders").then((orders) => {
       return orders.create(uuidV4()).then(({id}) => {
         return orders.update(id, {accountId, csr, notBefore, notAfter});
-      }).then(({id}) => {
-        return flow([
-          parseCsr,
-          map((domain) => this.authorizationService.create({
-            orderId: id,
+      }).then((order) => {
+        return parseCsr(csr).then(map((domain) => (
+          this.authorizationService.create({
+            orderId: order.id,
             identifierValue: domain,
             token: uuidV4().replace(/-/g, "")
-          })),
-          (promises) => Promise.all(promises)
-        ])(csr);
+          })
+        )))
+        .then(Promise.all)
+        .then(() => order);
       });
     });
   }

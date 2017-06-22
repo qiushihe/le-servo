@@ -35,7 +35,7 @@ export default ({accountService, directoryService}) => (req, res) => {
       : accountService.update(accountId, payload);
   }).then((account) => {
     return getRequestStatus(req) === "deactivated"
-      ? accountService.deactivate(accountId)
+      ? accountService.update(accountId, {status: "deactivated"})
       : account;
   }).then((account) => {
     res.setHeader("Content-Type", "application/json");
