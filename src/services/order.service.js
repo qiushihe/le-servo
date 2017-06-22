@@ -55,4 +55,17 @@ class OrderService {
   }
 }
 
+OrderService.storageAttributes = {
+  name: "orders",
+  attributes: [
+    {name: "accountId", defaultValue: null},
+    {name: "status", defaultValue: "pending"},
+    {name: "expires", defaultValue: null},
+    {name: "csr", defaultValue: null},
+    {name: "notBefore", defaultValue: null},
+    {name: "notAfter", defaultValue: null},
+    {name: "error", defaultValue: null}
+  ]
+};
+
 export default OrderService;

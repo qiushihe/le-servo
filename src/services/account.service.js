@@ -52,4 +52,14 @@ class AccountService {
   }
 }
 
+AccountService.storageAttributes = {
+  name: "accounts",
+  attributes: [
+    {name: "status", defaultValue: "valid"},
+    {name: "contact", defaultValue: []},
+    {name: "termsOfServiceAgreed", defaultValue: false},
+    {name: "kid", defaultValue: null}
+  ]
+};
+
 export default AccountService;

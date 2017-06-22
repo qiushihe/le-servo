@@ -40,4 +40,16 @@ class AuthorizationService {
   }
 }
 
+AuthorizationService.storageAttributes = {
+  name: "authorizations",
+  attributes: [
+    {name: "orderId", defaultValue: null},
+    {name: "identifierType", defaultValue: "dns"},
+    {name: "identifierValue", defaultValue: null},
+    {name: "status", defaultValue: "pending"},
+    {name: "expires", defaultValue: null},
+    {name: "token", defaultValue: null}
+  ]
+};
+
 export default AuthorizationService;

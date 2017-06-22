@@ -20,47 +20,9 @@ const nonceService = new NonceService({bufferSize: 32});
 const joseService = new JoseService();
 const directoryService = new DirectoryService({origin: "http://localhost:3000"});
 const collectionService = new CollectionService({
-  records: [{
-    name: "accounts",
-    attributes: [
-      {name: "status", defaultValue: "valid"},
-      {name: "contact", defaultValue: []},
-      {name: "termsOfServiceAgreed", defaultValue: false},
-      {name: "kid", defaultValue: null}
-    ]
-  }, {
-    name: "orders",
-    attributes: [
-      {name: "accountId", defaultValue: null},
-      {name: "status", defaultValue: "pending"},
-      {name: "expires", defaultValue: null},
-      {name: "csr", defaultValue: null},
-      {name: "notBefore", defaultValue: null},
-      {name: "notAfter", defaultValue: null},
-      {name: "error", defaultValue: null}
-    ]
-  }, {
-    name: "authorizations",
-    attributes: [
-      {name: "orderId", defaultValue: null},
-      {name: "identifierType", defaultValue: "dns"},
-      {name: "identifierValue", defaultValue: null},
-      {name: "status", defaultValue: "pending"},
-      {name: "expires", defaultValue: null},
-      {name: "token", defaultValue: null}
-    ]
-  }, {
-    name: "challenges",
-    attributes: [
-      {name: "authorizationId", defaultValue: null},
-      {name: "type", defaultValue: null},
-      {name: "url", defaultValue: null},
-      {name: "status", defaultValue: "pending"},
-      {name: "validated", defaultValue: null},
-      {name: "keyAuthorization", defaultValue: null},
-      {name: "error", defaultValue: null}
-    ]
-  }]
+  records: [
+    {...AccountService.storageAttributes}
+  ]
 });
 
 const accountService = new AccountService({

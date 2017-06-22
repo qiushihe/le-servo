@@ -22,18 +22,7 @@ describe("OrderService", () => {
     service = new OrderService({
       authorizationService,
       storage: new CollectionService({
-        records: [{
-          name: "orders",
-          attributes: [
-            {name: "accountId", defaultValue: null},
-            {name: "status", defaultValue: "pending"},
-            {name: "expires", defaultValue: null},
-            {name: "csr", defaultValue: null},
-            {name: "notBefore", defaultValue: null},
-            {name: "notAfter", defaultValue: null},
-            {name: "error", defaultValue: null}
-          ]
-        }]
+        records: [{...OrderService.storageAttributes}]
       })
     });
   });
@@ -105,6 +94,7 @@ describe("OrderService", () => {
       .then((order) => {
         expect(order).to.have.property("id");
         expect(order).to.have.property("accountId", "account42");
+        expect(order).to.have.property("csr", lalaDotCom);
         expect(service.authorizationService.create).to.have.been.calledOnce
           .and.to.have.been.calledWith(sinon.match({
             orderId: sinon.match.string,

@@ -20,15 +20,7 @@ describe("AccountService", () => {
     service = new AccountService({
       joseService,
       storage: new CollectionService({
-        records: [{
-          name: "accounts",
-          attributes: [
-            {name: "status", defaultValue: "valid"},
-            {name: "contact", defaultValue: []},
-            {name: "termsOfServiceAgreed", defaultValue: false},
-            {name: "kid", defaultValue: null}
-          ]
-        }]
+        records: [{...AccountService.storageAttributes}]
       })
     });
   });
