@@ -26,18 +26,17 @@ class AuthorizationService {
     });
   }
 
-  create({orderId, identifierType, identifierValue, status, expires, token}) {
+  create({orderId, identifierType, identifierValue, status, expires}) {
     return this.storage.get("authorizations").then((authorizations) => {
       return authorizations.create(uuidV4()).then(({id}) => {
         return authorizations.update(id, {
-          orderId, identifierType, identifierValue, status, expires, token
+          orderId, identifierType, identifierValue, status, expires
         });
       });
     }).then((authorization) => {
       return this.challengeService.create({
         authorizationId: authorization.id,
-        type: "http-01",
-        token: authorization.token
+        type: "http-01"
       })
       .then(() => authorization);
     });
@@ -57,8 +56,7 @@ AuthorizationService.storageAttributes = {
     {name: "identifierType", defaultValue: "dns"},
     {name: "identifierValue", defaultValue: null},
     {name: "status", defaultValue: "pending"},
-    {name: "expires", defaultValue: null},
-    {name: "token", defaultValue: null}
+    {name: "expires", defaultValue: null}
   ]
 };
 
