@@ -39,8 +39,7 @@ class OrderService {
       return parseCsr(csr).then(map((domain) => (
         this.authorizationService.create({
           orderId: order.id,
-          identifierValue: domain,
-          token: uuidV4().replace(/-/g, "")
+          identifierValue: domain
         })
       )))
       .then(Promise.all)

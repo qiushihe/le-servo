@@ -36,7 +36,8 @@ class AuthorizationService {
     }).then((authorization) => {
       return this.challengeService.create({
         authorizationId: authorization.id,
-        type: "http-01"
+        type: "http-01",
+        token: uuidV4().replace(/-/g, "")
       })
       .then(() => authorization);
     });

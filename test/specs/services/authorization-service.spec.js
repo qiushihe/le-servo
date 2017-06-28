@@ -95,7 +95,8 @@ describe("AuthorizationService", () => {
         expect(service.challengeService.create).to.have.been.calledOnce
           .and.to.have.been.calledWith(sinon.match({
             authorizationId: authorization.id,
-            type: sinon.match.string
+            type: sinon.match.string,
+            token: sinon.match.string
           }));
       })
     )));

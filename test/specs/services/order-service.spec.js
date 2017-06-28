@@ -98,7 +98,6 @@ describe("OrderService", () => {
         expect(service.authorizationService.create).to.have.been.calledOnce
           .and.to.have.been.calledWith(sinon.match({
             orderId: sinon.match.string,
-            token: sinon.match.string,
             identifierValue: "lala.com"
           }));
       })
