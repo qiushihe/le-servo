@@ -21,10 +21,10 @@ class ChallengeService {
     });
   }
 
-  create({authorizationId, type, status, keyAuthorization}) {
+  create({authorizationId, type, status, token}) {
     return this.storage.get("challenges").then((challenges) => {
       return challenges.create(uuidV4()).then(({id}) => {
-        return challenges.update(id, {authorizationId, type, status, keyAuthorization});
+        return challenges.update(id, {authorizationId, type, status, token});
       });
     });
   }
@@ -43,7 +43,7 @@ ChallengeService.storageAttributes = {
     {name: "type", defaultValue: null},
     {name: "status", defaultValue: "pending"},
     {name: "validated", defaultValue: null},
-    {name: "keyAuthorization", defaultValue: null},
+    {name: "token", defaultValue: null},
     {name: "error", defaultValue: null}
   ]
 };
