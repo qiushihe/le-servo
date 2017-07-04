@@ -1,3 +1,4 @@
+/* 400 */ export const TYPE_BAD_REQUEST = "Bad Request";
 /* 401 */ export const TYPE_UNAUTHORIZED = "Unauthorized";
 /* 403 */ export const TYPE_FORBIDDEN = "Forbidden";
 /* 404 */ export const TYPE_NOT_FOUND = "Not Found";

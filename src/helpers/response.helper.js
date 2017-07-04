@@ -1,4 +1,5 @@
 import {
+  TYPE_BAD_REQUEST,
   TYPE_UNAUTHORIZED,
   TYPE_FORBIDDEN,
   TYPE_NOT_FOUND,
@@ -7,6 +8,7 @@ import {
 } from "src/helpers/error.helper";
 
 export const STATUS_MAP = {
+  [TYPE_BAD_REQUEST]: 400,
   [TYPE_UNAUTHORIZED]: 401,
   [TYPE_FORBIDDEN]: 403,
   [TYPE_NOT_FOUND]: 404,
