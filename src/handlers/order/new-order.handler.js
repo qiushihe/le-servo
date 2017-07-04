@@ -28,17 +28,26 @@ export default ({
 
   accountService.find({kid: key.kid}).then((account) => {
     if (!account) {
-      throw new RuntimeError({message: "Account not found", type: TYPE_NOT_FOUND});
+      throw new RuntimeError({
+        message: "Account not found",
+        type: TYPE_NOT_FOUND
+      });
     }
 
     if (account.status === "deactivated") {
-      throw new RuntimeError({message: "Account deactivated", type: TYPE_FORBIDDEN});
+      throw new RuntimeError({
+        message: "Account deactivated",
+        type: TYPE_FORBIDDEN
+      });
     }
 
     return account;
   }).then((account) => {
     if (isEmpty(requestCsr)) {
-      throw new RuntimeError({message: "CSR must not be empty", type: TYPE_BAD_REQUEST});
+      throw new RuntimeError({
+        message: "CSR must not be empty",
+        type: TYPE_BAD_REQUEST
+      });
     }
 
     return orderService.create({

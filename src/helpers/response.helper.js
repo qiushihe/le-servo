@@ -16,6 +16,8 @@ export const STATUS_MAP = {
   [TYPE_UNPROCESSABLE_ENTITY]: 422
 };
 
-export const runtimeErrorResponse = (res) => ({message, type}) => {
-  res.status(STATUS_MAP[type] || 500).send(message).end();
+export const runtimeErrorResponse = (res) => (err = "") => {
+  const {message, type} = err;
+  const errorMessage = message || err || "Unknown Error";
+  res.status(STATUS_MAP[type] || 500).send(errorMessage).end();
 };

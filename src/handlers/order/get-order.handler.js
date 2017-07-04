@@ -35,14 +35,14 @@ export default ({
     }).then((account) => {
       if (account.kid !== key.kid) {
         throw new RuntimeError({
-          message: "Challenge.Authorization.Order.Account key mis-match",
+          message: "Order.Account key mis-match",
           type: TYPE_UNAUTHORIZED
         });
       }
 
       if (account.status === "deactivated") {
         throw new RuntimeError({
-          message: "Challenge.Authorization.Order.Account deactivated",
+          message: "Order.Account deactivated",
           type: TYPE_FORBIDDEN
         });
       }
