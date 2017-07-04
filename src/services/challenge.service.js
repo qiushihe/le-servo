@@ -29,9 +29,9 @@ class ChallengeService {
     });
   }
 
-  update(id, {status, validated, error}) {
+  update(id, {status, validated, error, keyAuthorization}) {
     return this.storage.get("challenges").then((challenges) => {
-      return challenges.update(id, {status, validated, error});
+      return challenges.update(id, {status, validated, error, keyAuthorization});
     });
   }
 }
@@ -44,7 +44,8 @@ ChallengeService.storageAttributes = {
     {name: "status", defaultValue: "pending"},
     {name: "validated", defaultValue: null},
     {name: "token", defaultValue: null},
-    {name: "error", defaultValue: null}
+    {name: "error", defaultValue: null},
+    {name: "keyAuthorization", defaultValue: null}
   ]
 };
 

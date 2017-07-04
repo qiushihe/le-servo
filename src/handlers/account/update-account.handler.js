@@ -3,6 +3,13 @@ import omitBy from "lodash/fp/omitBy";
 import isEmpty from "lodash/fp/isEmpty";
 
 import {getJoseVerifiedKey} from "src/helpers/request.helper";
+import {
+  RuntimeError,
+  TYPE_UNAUTHORIZED,
+  TYPE_FORBIDDEN,
+  TYPE_NOT_FOUND
+} from "src/helpers/error.helper";
+import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
 const getRequestAccountId = get("params.accound_id");
 const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");
@@ -10,19 +17,22 @@ const getRequestContact = get("body.contact");
 const getRequestStatus = get("body.status");
 const isValuePresent = (value) => (value === undefined || value === null);
 
-export default ({accountService, directoryService}) => (req, res) => {
+export default ({
+  accountService,
+  directoryService
+}) => (req, res) => {
   const key = getJoseVerifiedKey(req);
   const accountId = getRequestAccountId(req);
 
   accountService.get(accountId).catch(() => {
-    throw new Error("Account not found");
+    throw new RuntimeError({message: "Account not found", type: TYPE_NOT_FOUND});
   }).then((account) => {
     if (account.kid !== key.kid) {
-      throw new Error("Account key mis-match");
+      throw new RuntimeError({message: "Account key mis-match", type: TYPE_UNAUTHORIZED});
     }
 
     if (account.status === "deactivated") {
-      throw new Error("Account deactivated");
+      throw new RuntimeError({message: "Account deactivated", type: TYPE_FORBIDDEN});
     }
 
     const payload = omitBy(isValuePresent)({
@@ -46,15 +56,5 @@ export default ({accountService, directoryService}) => (req, res) => {
       "terms-of-service-agreed": account.termsOfServiceAgreed,
       orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
     })).end();
-  }).catch(({message}) => {
-    if (message === "Account not found") {
-      res.status(404).send(message).end();
-    } else if (message === "Account key mis-match") {
-      res.status(401).send(message).end();
-    } else if (message === "Account deactivated") {
-      res.status(403).send(message).end();
-    } else {
-      res.status(500).send(message).end();
-    }
-  });
+  }).catch(runtimeErrorResponse(res));
 };
