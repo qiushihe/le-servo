@@ -16,8 +16,9 @@ TODO:
 
 * New authorization handler
 * New authorization route
-* Orders list handler
-* Orders list route
+* Certificate service
+* Download certificate handler
+* Download certificate route
 
 * New authorization handler test
 * Orders list handler test
@@ -26,3 +27,5 @@ TODO:
 * Respond to challenge handler test
 * Get order handler test
 * New order handler test
+* Certificate service test
+* Download certificate handler test

@@ -20,6 +20,7 @@ import newAccount from "src/handlers/account/new-account.handler";
 import updateAccount from "src/handlers/account/update-account.handler";
 import newOrder from "src/handlers/order/new-order.handler";
 import getOrder from "src/handlers/order/get-order.handler";
+import getOrders from "src/handlers/order/get-orders.handler";
 import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
@@ -90,6 +91,12 @@ directoryService.each((_, {method, path, handler}) => {
 });
 
 server.post("/accounts/:accound_id", updateAccount({directoryService, accountService}));
+
+server.get("/accounts/:accound_id/orders", getOrders({
+  accountService,
+  orderService,
+  directoryService
+}));
 
 server.get("/order/:order_id", getOrder({
   accountService,

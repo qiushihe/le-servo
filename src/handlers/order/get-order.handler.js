@@ -64,7 +64,8 @@ export default ({
       notAfter: order.notAfter,
       authorizations: map((authorization) => {
         return directoryService.getFullUrl(`/authz/${authorization.id}`);
-      })(authorizations)
+      })(authorizations),
+      certificate: null // TODO: Implement this!
     })).end();
   }).catch(runtimeErrorResponse(res));
 };
