@@ -14,7 +14,15 @@ Things not (going to be) implemented:
 
 TODO:
 
-* Order list route
+* New authorization handler
 * New authorization route
-* Challenge response route
-* Challenge status route
+* Orders list handler
+* Orders list route
+
+* New authorization handler test
+* Orders list handler test
+* Get authorization handler test
+* Get challenge handler test
+* Respond to challenge handler test
+* Get order handler test
+* New order handler test

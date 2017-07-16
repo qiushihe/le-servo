@@ -19,6 +19,10 @@ import directory from "src/handlers/directory.handler";
 import newAccount from "src/handlers/account/new-account.handler";
 import updateAccount from "src/handlers/account/update-account.handler";
 import newOrder from "src/handlers/order/new-order.handler";
+import getOrder from "src/handlers/order/get-order.handler";
+import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
+import getChallenge from "src/handlers/challenge/get-challenge.handler";
+import getAuthorization from "src/handlers/authorization/get-authorization.handler";
 
 const nonceService = new NonceService({bufferSize: 32});
 const joseService = new JoseService();
@@ -57,10 +61,7 @@ directoryService.addField("new-nonce", {
 directoryService.addField("new-account", {
   method: "post",
   path: "/new-account",
-  handler: newAccount({
-    directoryService,
-    accountService
-  })
+  handler: newAccount({directoryService, accountService})
 });
 
 directoryService.addField("new-order", {
@@ -89,6 +90,37 @@ directoryService.each((_, {method, path, handler}) => {
 });
 
 server.post("/accounts/:accound_id", updateAccount({directoryService, accountService}));
+
+server.get("/order/:order_id", getOrder({
+  accountService,
+  orderService,
+  authorizationService,
+  directoryService
+}));
+
+server.post("/authz/:authorization_id", getAuthorization({
+  challengeService,
+  authorizationService,
+  orderService,
+  accountService,
+  directoryService
+}));
+
+server.post("/authz/:authorization_id/:challenge_id", respondToChallenge({
+  challengeService,
+  authorizationService,
+  orderService,
+  accountService,
+  directoryService
+}));
+
+server.get("/authz/:authorization_id/:challenge_id", getChallenge({
+  challengeService,
+  authorizationService,
+  orderService,
+  accountService,
+  directoryService
+}));
 
 server.listen(port, () => {
   console.log(`Server started on port ${port}`); // eslint-disable-line
