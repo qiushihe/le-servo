@@ -6,6 +6,9 @@ import JoseService from "src/services/jose.service";
 import DirectoryService from "src/services/directory.service";
 import CollectionService from "src/services/collection.service";
 import AccountService from "src/services/account.service";
+import ChallengeService from "src/services/challenge.service";
+import AuthorizationService from "src/services/authorization.service";
+import OrderService from "src/services/order.service";
 
 import newNonce from "src/filters/new-nonce.filter";
 import joseVerify from "src/filters/jose-verify.filter";
@@ -15,6 +18,7 @@ import empty from "src/handlers/empty.handler";
 import directory from "src/handlers/directory.handler";
 import newAccount from "src/handlers/account/new-account.handler";
 import updateAccount from "src/handlers/account/update-account.handler";
+import newOrder from "src/handlers/order/new-order.handler";
 
 const nonceService = new NonceService({bufferSize: 32});
 const joseService = new JoseService();
@@ -30,6 +34,20 @@ const accountService = new AccountService({
   storage: collectionService
 });
 
+const challengeService = new ChallengeService({
+  storage: collectionService
+});
+
+const authorizationService = new AuthorizationService({
+  challengeService,
+  storage: collectionService
+});
+
+const orderService = new OrderService({
+  authorizationService,
+  storage: collectionService
+});
+
 directoryService.addField("new-nonce", {
   method: "all",
   path: "/new-nonce",
@@ -39,7 +57,21 @@ directoryService.addField("new-nonce", {
 directoryService.addField("new-account", {
   method: "post",
   path: "/new-account",
-  handler: newAccount({directoryService, accountService})
+  handler: newAccount({
+    directoryService,
+    accountService
+  })
+});
+
+directoryService.addField("new-order", {
+  method: "post",
+  path: "/new-order",
+  handler: newOrder({
+    accountService,
+    orderService,
+    authorizationService,
+    directoryService
+  })
 });
 
 const port = 3000;
