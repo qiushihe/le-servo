@@ -34,7 +34,7 @@ export default ({
         type: TYPE_NOT_FOUND
       });
     }).then((account) => {
-      if (account.kid !== key.kid) {
+      if (key && account.kid !== key.kid) {
         throw new RuntimeError({
           message: "Challenge.Authorization.Order.Account key mis-match",
           type: TYPE_UNAUTHORIZED

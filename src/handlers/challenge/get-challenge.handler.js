@@ -1,6 +1,5 @@
 import get from "lodash/fp/get";
 
-import {getJoseVerifiedKey} from "src/helpers/request.helper";
 import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
 const getRequestChallengeId = get("params.challenge_id");
@@ -14,11 +13,9 @@ export default ({
   accountService,
   directoryService
 }) => (req, res) => {
-  const key = getJoseVerifiedKey(req);
   const challengeId = getRequestChallengeId(req);
 
   getAllRelated({
-    key,
     challengeId,
     challengeService,
     authorizationService,

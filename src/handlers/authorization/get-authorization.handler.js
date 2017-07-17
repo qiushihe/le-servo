@@ -1,7 +1,6 @@
 import get from "lodash/fp/get";
 import map from "lodash/fp/map";
 
-import {getJoseVerifiedKey} from "src/helpers/request.helper";
 import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
 import getAllRelated from "./get-all-related";
@@ -15,11 +14,9 @@ export default ({
   accountService,
   directoryService
 }) => (req, res) => {
-  const key = getJoseVerifiedKey(req);
   const authorizationId = getRequestAuthorizationId(req);
 
   getAllRelated((
-    key,
     authorizationId,
     challengeService,
     authorizationService,

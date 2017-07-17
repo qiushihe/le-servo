@@ -105,7 +105,7 @@ server.get("/order/:order_id", getOrder({
   directoryService
 }));
 
-server.post("/authz/:authorization_id", getAuthorization({
+server.get("/authz/:authorization_id", getAuthorization({
   challengeService,
   authorizationService,
   orderService,

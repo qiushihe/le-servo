@@ -1,12 +1,10 @@
 import get from "lodash/fp/get";
 import map from "lodash/fp/map";
 
-import {getJoseVerifiedKey} from "src/helpers/request.helper";
 import {
   RuntimeError,
   TYPE_FORBIDDEN,
-  TYPE_NOT_FOUND,
-  TYPE_UNAUTHORIZED
+  TYPE_NOT_FOUND
 } from "src/helpers/error.helper";
 import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
@@ -17,7 +15,6 @@ export default ({
   orderService,
   directoryService
 }) => (req, res) => {
-  const key = getJoseVerifiedKey(req);
   const requestAccountId = getRequestAccountId(req);
 
   accountService.get(requestAccountId).catch(() => {
@@ -26,13 +23,6 @@ export default ({
       type: TYPE_NOT_FOUND
     });
   }).then((account) => {
-    if (account.kid !== key.kid) {
-      throw new RuntimeError({
-        message: "Order.Account key mis-match",
-        type: TYPE_UNAUTHORIZED
-      });
-    }
-
     if (account.status === "deactivated") {
       throw new RuntimeError({
         message: "Order.Account deactivated",

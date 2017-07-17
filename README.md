@@ -11,16 +11,14 @@ Things not (going to be) implemented:
 * 7.3.4. Changes of Terms of Service
 * 7.3.5. External Account Binding
 * 7.3.6. Account Key Roll-over
+* 7.4.1. Pre-Authorization
 
 TODO:
 
-* New authorization handler
-* New authorization route
 * Certificate service
 * Download certificate handler
 * Download certificate route
 
-* New authorization handler test
 * Orders list handler test
 * Get authorization handler test
 * Get challenge handler test
