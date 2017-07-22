@@ -20,6 +20,12 @@ class AuthorizationService {
     });
   }
 
+  filter(query) {
+    return this.storage.get("authorizations").then((authorizations) => {
+      return authorizations.filter(query);
+    });
+  }
+
   get(id) {
     return this.storage.get("authorizations").then((authorizations) => {
       return authorizations.get(id);

@@ -16,13 +16,13 @@ export default ({
 }) => (req, res) => {
   const authorizationId = getRequestAuthorizationId(req);
 
-  getAllRelated((
+  getAllRelated({
     authorizationId,
     challengeService,
     authorizationService,
     orderService,
     accountService
-  )).then(({authorization, challenges}) => {
+  }).then(({authorization, challenges}) => {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Location", directoryService.getFullUrl(`/authz/${authorization.id}`));
     res.send(JSON.stringify({

@@ -24,6 +24,12 @@ class OrderService {
     });
   }
 
+  filter(query) {
+    return this.storage.get("orders").then((orders) => {
+      return orders.filter(query);
+    });
+  }
+
   get(id) {
     return this.storage.get("orders").then((orders) => {
       return orders.get(id);

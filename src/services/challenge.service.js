@@ -15,6 +15,12 @@ class ChallengeService {
     });
   }
 
+  filter(query) {
+    return this.storage.get("challenges").then((challenges) => {
+      return challenges.filter(query);
+    });
+  }
+
   get(id) {
     return this.storage.get("challenges").then((challenges) => {
       return challenges.get(id);

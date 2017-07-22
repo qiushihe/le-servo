@@ -61,8 +61,12 @@ export default ({
       });
     }
 
+    return key.thumbprint("SHA-256").then((thumbprint) => {
+      return {challenge, authorization, order, account, thumbprint};
+    });
+  }).then(({challenge, authorization, order, account, thumbprint}) => {
     const requestKeyAuthorization = getRequestKeyAuthorization(req);
-    const expectedKeyAuthorization = `${challenge.token}.${base64url(key.thumbprint("SHA-256"))}`;
+    const expectedKeyAuthorization = `${challenge.token}.${base64url(thumbprint)}`;
 
     if (requestKeyAuthorization !== expectedKeyAuthorization) {
       throw new RuntimeError({
@@ -73,7 +77,7 @@ export default ({
 
     // TODO: Do something (spawn a worker?) to actually process the http-01 challenge
 
-    return challengeService.update({
+    return challengeService.update(challenge.id, {
       status: "processing",
       keyAuthorization: expectedKeyAuthorization
     }).then((updatedChallenge) => {

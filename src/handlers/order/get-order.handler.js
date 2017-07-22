@@ -40,7 +40,7 @@ export default ({
       return {order, account};
     });
   }).then(({order, account}) => {
-    return authorizationService.find({orderId: order.id}).then((authorizations) => {
+    return authorizationService.filter({orderId: order.id}).then((authorizations) => {
       return {order, account, authorizations};
     });
   }).then(({order, authorizations}) => {

@@ -20,6 +20,12 @@ class AccountService {
     });
   }
 
+  filter(query) {
+    return this.storage.get("accounts").then((accounts) => {
+      return accounts.filter(query);
+    });
+  }
+
   get(id) {
     return this.storage.get("accounts").then((accounts) => {
       return accounts.get(id);

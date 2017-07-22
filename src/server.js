@@ -34,7 +34,10 @@ export default ({
   const directoryService = new DirectoryService({origin});
   const collectionService = new CollectionService({
     records: [
-      {...AccountService.storageAttributes}
+      {...AccountService.storageAttributes},
+      {...AuthorizationService.storageAttributes},
+      {...ChallengeService.storageAttributes},
+      {...OrderService.storageAttributes}
     ]
   });
 

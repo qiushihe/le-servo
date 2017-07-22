@@ -57,7 +57,7 @@ export default ({
       notAfter: requestNotAfter
     });
   }).then((order) => {
-    return authorizationService.find({orderId: order.id}).then((authorizations) => {
+    return authorizationService.filter({orderId: order.id}).then((authorizations) => {
       return {order, authorizations};
     });
   }).then(({order, authorizations}) => {

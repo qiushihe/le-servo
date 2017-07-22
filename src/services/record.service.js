@@ -5,6 +5,7 @@ import reduce from "lodash/fp/reduce";
 import flow from "lodash/fp/flow";
 import values from "lodash/fp/values";
 import find from "lodash/fp/find";
+import filter from "lodash/fp/filter";
 import isUndefined from "lodash/fp/isUndefined";
 import isEmpty from "lodash/fp/isEmpty";
 import isFunction from "lodash/fp/isFunction";
@@ -39,6 +40,18 @@ class RecordService {
       } else {
         resolve(null);
       }
+    });
+  }
+
+  filter(query) {
+    return new Promise((resolve) => {
+      const records = flow([
+        values,
+        filter(query),
+        map((record) => cloneDeep(record))
+      ])(this.records);
+
+      resolve(records);
     });
   }
 

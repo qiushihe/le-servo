@@ -32,7 +32,7 @@ export default ({
 
     return account;
   }).then((account) => {
-    return orderService.find({accountId: account.id});
+    return orderService.filter({accountId: account.id});
   }).then((orders) => {
     res.setHeader("Content-Type", "application/json");
     res.send(JSON.stringify({

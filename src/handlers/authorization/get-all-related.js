@@ -51,7 +51,7 @@ export default ({
       return {authorization, order, account};
     });
   }).then(({authorization, order, account}) => {
-    return challengeService.find({authorizationId: authorization.id}).then((challenges) => {
+    return challengeService.filter({authorizationId: authorization.id}).then((challenges) => {
       return {authorization, order, account, challenges};
     });
   });
