@@ -1,4 +1,3 @@
-import express from "express";
 import bodyParser from "body-parser";
 
 import NonceService from "src/services/nonce.service";
@@ -25,10 +24,7 @@ import respondToChallenge from "src/handlers/challenge/respond-to-challenge.hand
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
 
-export default ({
-  origin,
-  nonceBufferSize
-}) => {
+export default ({origin, nonceBufferSize}) => (server) => {
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
   const directoryService = new DirectoryService({origin});
@@ -82,8 +78,6 @@ export default ({
       directoryService
     })
   });
-
-  const server = express();
 
   server.use(bodyParser.json());
   server.use(newNonce({nonceService}));

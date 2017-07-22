@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
 import {JWK} from "node-jose";
-import Promise from "bluebird";
 import request from "request-promise";
 import base64url from "base64url";
 
-import getServer from "src/server";
+import serverBuilder from "src/server-builder";
 
-import {getRansomPort} from "test/helpers/server.helper";
+import {getServer, getRansomPort} from "test/helpers/server.helper";
 import {async} from "test/helpers/test.helper";
 import {signWithJws as sign} from "test/helpers/jws.helper";
 
@@ -15,8 +14,6 @@ import csrFixture from "test/fixtures/csr-base64url/lala.com.js";
 describe("Integration Test", () => {
   let port;
   let server;
-  let listener;
-  let ready;
 
   let clientKeystore;
   let clientKeyReady;
@@ -25,12 +22,11 @@ describe("Integration Test", () => {
     port = getRansomPort();
 
     server = getServer({
-      origin: `http://localhost:${port}`,
-      nonceBufferSize: 32
-    });
-
-    ready = new Promise((resolve) => {
-      listener = server.listen(port, resolve);
+      port,
+      setup: serverBuilder({
+        origin: `http://localhost:${port}`,
+        nonceBufferSize: 32
+      })
     });
 
     clientKeystore = JWK.createKeyStore();
@@ -38,11 +34,11 @@ describe("Integration Test", () => {
   });
 
   afterEach((done) => {
-    listener.close(done);
+    server.close(done);
   });
 
   it("should complete the basic flow", async(() => (
-    ready.then(() => {
+    server.getReady().then(() => {
       return request({
         uri: `http://localhost:${port}/directory`,
         method: "GET",
