@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 import {JWK} from "node-jose";
 import Promise from "bluebird";
 import request from "request-promise";
+import base64url from "base64url";
 
 import getServer from "src/server";
 
@@ -8,13 +10,13 @@ import {getRansomPort} from "test/helpers/server.helper";
 import {async} from "test/helpers/test.helper";
 import {signWithJws as sign} from "test/helpers/jws.helper";
 
-describe.only("Test", () => {
+import csrFixture from "test/fixtures/csr-base64url/lala.com.js";
+
+describe("Integration Test", () => {
   let port;
   let server;
   let listener;
   let ready;
-
-  let getUrl;
 
   let clientKeystore;
   let clientKeyReady;
@@ -31,8 +33,6 @@ describe.only("Test", () => {
       listener = server.listen(port, resolve);
     });
 
-    getUrl = (path) => `http://localhost:${port}${path}`;
-
     clientKeystore = JWK.createKeyStore();
     clientKeyReady = clientKeystore.generate("EC", "P-256");
   });
@@ -41,10 +41,10 @@ describe.only("Test", () => {
     listener.close(done);
   });
 
-  it("should lala", async(() => (
+  it("should complete the basic flow", async(() => (
     ready.then(() => {
       return request({
-        uri: getUrl("/directory"),
+        uri: `http://localhost:${port}/directory`,
         method: "GET",
         json: true
       }).then((directory) => {
@@ -82,13 +82,69 @@ describe.only("Test", () => {
           resolveWithFullResponse: true
         });
       }).then((res) => {
+        expect(res.body).to.have.property("status", "valid");
+        expect(res.body).to.have.property("orders");
+        expect(res.body.contact).to.not.be.empty;
+        expect(res.body.contact[0]).to.equal("integration@le-servo.test.com");
         return {directory, nonce: res.headers["replay-nonce"], key, account: res.body};
       });
     }).then(({directory, nonce, key, account}) => {
-      console.log("directory", directory);
-      console.log("nonce", nonce);
-      console.log("key", key);
-      console.log("account", account);
+      const header = {nonce, url: directory["new-order"]};
+      const payload = {"csr": csrFixture};
+
+      return sign(header, payload, {hasJwk: false, hasKid: true})(key).then((jws) => {
+        return request({
+          uri: directory["new-order"],
+          method: "POST",
+          json: true,
+          body: jws,
+          resolveWithFullResponse: true
+        });
+      }).then((res) => {
+        expect(res.body).to.have.property("status", "pending");
+        expect(res.body).to.have.property("csr");
+        expect(res.body.authorizations).to.not.be.empty;
+        return {directory, nonce: res.headers["replay-nonce"], key, account, order: res.body};
+      });
+    }).then(({directory, nonce, key, account, order}) => {
+      return request({
+        uri: order.authorizations[0],
+        method: "GET",
+        json: true
+      }).then((authorization) => {
+        expect(authorization).to.have.property("status", "pending");
+        expect(authorization).to.have.property("identifier");
+        expect(authorization.identifier).to.have.property("type", "dns");
+        expect(authorization.identifier).to.have.property("value", "lala.com");
+        expect(authorization).to.have.property("challenges");
+        expect(authorization.challenges).to.not.be.empty;
+        expect(authorization.challenges[0]).to.have.property("type", "http-01");
+        expect(authorization.challenges[0]).to.have.property("status", "pending");
+        return {directory, nonce, key, account, order, authorization};
+      });
+    }).then(({directory, nonce, key, account, order, authorization}) => {
+      const challenge = authorization.challenges[0];
+      const header = {nonce, url: challenge.url};
+
+      return key.thumbprint("SHA-256").then((thumbprint) => {
+        const payload = {
+          "type": "http-01",
+          "keyAuthorization": `${challenge.token}.${base64url(thumbprint)}`
+        };
+
+        return sign(header, payload, {hasJwk: false, hasKid: true})(key).then((jws) => {
+          return request({
+            uri: challenge.url,
+            method: "POST",
+            json: true,
+            body: jws,
+            resolveWithFullResponse: true
+          });
+        }).then((res) => {
+          expect(res.body).to.have.property("status", "processing");
+        });
+      });
     })
   )));
 });
+/* eslint-enable no-unused-vars */
