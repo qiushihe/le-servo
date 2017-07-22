@@ -1,6 +1,5 @@
 import Promise from "bluebird";
 
-import JoseService from "src/services/jose.service";
 import CollectionService from "src/services/collection.service";
 import AccountService from "src/services/account.service";
 
@@ -9,25 +8,21 @@ import {async} from "test/helpers/test.helper";
 describe("AccountService", () => {
   let sandbox;
   let service;
+  let joseService;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+
+    joseService = {
+      addKey: sandbox.stub().returns(Promise.resolve())
+    };
+
     service = new AccountService({
-      joseService: new JoseService(),
+      joseService,
       storage: new CollectionService({
-        records: [{
-          name: "accounts",
-          attributes: [
-            {name: "status", defaultValue: "valid"},
-            {name: "contact", defaultValue: []},
-            {name: "termsOfServiceAgreed", defaultValue: false},
-            {name: "kid", defaultValue: null}
-          ]
-        }]
+        records: [{...AccountService.storageAttributes}]
       })
     });
-
-    sandbox.stub(service.joseService, "addKey").returns(Promise.resolve());
   });
 
   afterEach(() => {
@@ -130,24 +125,6 @@ describe("AccountService", () => {
         expect(account).to.have.property("id", "lala42");
         expect(account).to.have.property("termsOfServiceAgreed", true);
         expect(account.contact).to.deep.equal(["mailto:lala2@lalaland.com"]);
-      })
-    )));
-  });
-
-  describe("#deactivate()", () => {
-    beforeEach(() => {
-      service.storage.collections.accounts.records["lala42"] = {
-        id: "lala42",
-        status: "valid",
-        contact: ["lala@lalaland.com"],
-        termsOfServiceAgreed: false,
-        kid: "key-42"
-      };
-    });
-
-    it("should deactivate account", async(() => (
-      service.deactivate("lala42").then((account) => {
-        expect(account).to.have.property("status", "deactivated");
       })
     )));
   });

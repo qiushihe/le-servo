@@ -2,6 +2,13 @@ import get from "lodash/fp/get";
 
 import {getJoseVerifiedKey} from "src/helpers/request.helper";
 
+import {
+  RuntimeError,
+  TYPE_FORBIDDEN,
+  TYPE_NOT_FOUND
+} from "src/helpers/error.helper";
+import {runtimeErrorResponse} from  "src/helpers/response.helper";
+
 const getRequestOnlyReturnExisting = get("body.only-return-existing");
 const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");
 const getRequestContact = get("body.contact");
@@ -17,11 +24,11 @@ export default ({
 
   accountService.find({kid: key.kid}).then((account) => {
     if (!account && onlyReturnExisting) {
-      throw new Error("Account not found");
+      throw new RuntimeError({message: "Account not found", type: TYPE_NOT_FOUND});
     }
 
     if (account && account.status === "deactivated") {
-      throw new Error("Account deactivated");
+      throw new RuntimeError({message: "Account deactivated", type: TYPE_FORBIDDEN});
     }
 
     return account
@@ -35,15 +42,7 @@ export default ({
       status: account.status,
       contact: account.contact,
       "terms-of-service-agreed": account.termsOfServiceAgreed,
-      orders: "http://TODO" // TODO: Get orders URL
+      orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
     })).end();
-  }).catch(({message}) => {
-    if (message === "Account not found") {
-      res.status(404).send(message).end();
-    } else if (message === "Account deactivated") {
-      res.status(403).send(message).end();
-    } else {
-      res.status(500).send(message).end();
-    }
-  });
+  }).catch(runtimeErrorResponse(res));
 };

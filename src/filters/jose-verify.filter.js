@@ -13,21 +13,25 @@ export default ({joseService}) => (req, _, next) => {
 
   if (isEmpty(protectedHeader) || isEmpty(payload) || isEmpty(signature)) {
     next();
-  } else {
-    joseService.verify(requestBody)
-      .then(({payload, header, key}) => {
-        req.__leServoFilters = req.__leServoFilters || {};
-        req.__leServoFilters.jose = req.__leServoFilters.jose || {};
-        req.__leServoFilters = {
-          ...req.__leServoFilters,
-          jose: {
-            ...req.__leServoFilters.jose,
-            verifiedNonce: header.nonce,
-            verifiedKey: key
-          }
-        };
-        req.body = payload;
-        next();
-      });
+    return;
   }
+
+  joseService.verify(requestBody).then(({
+    payload,
+    header,
+    key
+  }) => {
+    req.__leServoFilters = req.__leServoFilters || {};
+    req.__leServoFilters.jose = req.__leServoFilters.jose || {};
+    req.__leServoFilters = {
+      ...req.__leServoFilters,
+      jose: {
+        ...req.__leServoFilters.jose,
+        verifiedNonce: header.nonce,
+        verifiedKey: key
+      }
+    };
+    req.body = payload;
+    next();
+  });
 };

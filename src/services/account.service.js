@@ -20,6 +20,12 @@ class AccountService {
     });
   }
 
+  filter(query) {
+    return this.storage.get("accounts").then((accounts) => {
+      return accounts.filter(query);
+    });
+  }
+
   get(id) {
     return this.storage.get("accounts").then((accounts) => {
       return accounts.get(id);
@@ -45,17 +51,21 @@ class AccountService {
     });
   }
 
-  update(id, {contact, termsOfServiceAgreed}) {
+  update(id, {status, contact, termsOfServiceAgreed}) {
     return this.storage.get("accounts").then((accounts) => {
-      return accounts.update(id, {contact, termsOfServiceAgreed});
-    });
-  }
-
-  deactivate(id) {
-    return this.storage.get("accounts").then((accounts) => {
-      return accounts.update(id, {status: "deactivated"});
+      return accounts.update(id, {status, contact, termsOfServiceAgreed});
     });
   }
 }
+
+AccountService.storageAttributes = {
+  name: "accounts",
+  attributes: [
+    {name: "status", defaultValue: "valid"},
+    {name: "contact", defaultValue: []},
+    {name: "termsOfServiceAgreed", defaultValue: false},
+    {name: "kid", defaultValue: null}
+  ]
+};
 
 export default AccountService;
