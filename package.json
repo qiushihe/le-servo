@@ -7,8 +7,9 @@
     "eslint": "eslint src/** test/**",
     "build": "rm -fr build/server && babel src -q --source-maps --out-dir build/server",
     "build-test": "npm run build && rm -fr build/test && BABEL_ENV=test babel test -q --source-maps --out-dir build/test",
-    "server": "npm run build && node ./build/server/index.js",
-    "test": "npm run eslint && npm run build-test && NODE_ENV=test nyc --reporter=html --reporter=text mocha --recursive build/test"
+    "dev": "npm run build && node ./build/server/index.js",
+    "test": "npm run eslint && npm run build-test && NODE_ENV=test nyc --reporter=html --reporter=text mocha --recursive build/test",
+    "server": "node ./build/server/index.js"
   },
   "repository": "https://github.com/qiushihe/le-servo",
   "author": "Billy He",
