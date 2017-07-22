@@ -15,10 +15,12 @@ Things not (going to be) implemented:
 
 TODO:
 
+* URL header check filter
 * Certificate service
 * Download certificate handler
 * Download certificate route
 
+* URL header check filter test
 * Orders list handler test
 * Get authorization handler test
 * Get challenge handler test
