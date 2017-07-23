@@ -9,6 +9,7 @@ import ChallengeService from "src/services/challenge.service";
 import AuthorizationService from "src/services/authorization.service";
 import OrderService from "src/services/order.service";
 
+import logging from "src/filters/logging.filter";
 import newNonce from "src/filters/new-nonce.filter";
 import joseVerify from "src/filters/jose-verify.filter";
 import useNonce from "src/filters/use-nonce.filter";
@@ -80,6 +81,7 @@ export default ({origin, nonceBufferSize}) => (server) => {
   });
 
   server.use(bodyParser.json());
+  server.use(logging({}));
   server.use(newNonce({nonceService}));
   server.use(joseVerify({joseService}));
   server.use(useNonce({nonceService}));

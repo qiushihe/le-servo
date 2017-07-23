@@ -11,7 +11,7 @@ import {signWithJws as sign} from "test/helpers/jws.helper";
 
 import csrFixture from "test/fixtures/csr-base64url/lala.com.js";
 
-describe("Integration Test", () => {
+describe.only("Integration Test", () => {
   let port;
   let server;
 
