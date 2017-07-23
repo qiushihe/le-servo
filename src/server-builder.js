@@ -25,7 +25,7 @@ import respondToChallenge from "src/handlers/challenge/respond-to-challenge.hand
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
 
-export default ({origin, nonceBufferSize}) => (server) => {
+export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
   const directoryService = new DirectoryService({origin});
@@ -81,7 +81,11 @@ export default ({origin, nonceBufferSize}) => (server) => {
   });
 
   server.use(bodyParser.json());
-  server.use(logging({}));
+
+  if (!suppressLogging) {
+    server.use(logging({}));
+  }
+
   server.use(newNonce({nonceService}));
   server.use(joseVerify({joseService}));
   server.use(useNonce({nonceService}));

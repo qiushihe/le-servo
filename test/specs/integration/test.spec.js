@@ -25,7 +25,8 @@ describe.only("Integration Test", () => {
       port,
       setup: serverBuilder({
         origin: `http://localhost:${port}`,
-        nonceBufferSize: 32
+        nonceBufferSize: 32,
+        suppressLogging: true
       })
     });
 
