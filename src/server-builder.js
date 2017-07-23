@@ -1,4 +1,3 @@
-import express from "express";
 import bodyParser from "body-parser";
 
 import NonceService from "src/services/nonce.service";
@@ -10,6 +9,7 @@ import ChallengeService from "src/services/challenge.service";
 import AuthorizationService from "src/services/authorization.service";
 import OrderService from "src/services/order.service";
 
+import logging from "src/filters/logging.filter";
 import newNonce from "src/filters/new-nonce.filter";
 import joseVerify from "src/filters/jose-verify.filter";
 import useNonce from "src/filters/use-nonce.filter";
@@ -25,10 +25,7 @@ import respondToChallenge from "src/handlers/challenge/respond-to-challenge.hand
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
 
-export default ({
-  origin,
-  nonceBufferSize
-}) => {
+export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
   const directoryService = new DirectoryService({origin});
@@ -83,9 +80,12 @@ export default ({
     })
   });
 
-  const server = express();
-
   server.use(bodyParser.json());
+
+  if (!suppressLogging) {
+    server.use(logging({}));
+  }
+
   server.use(newNonce({nonceService}));
   server.use(joseVerify({joseService}));
   server.use(useNonce({nonceService}));

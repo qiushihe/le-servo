@@ -38,7 +38,7 @@ export default ({
   .then((account) => {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Location", directoryService.getFullUrl(`/accounts/${account.id}`));
-    res.send(JSON.stringify({
+    res.status(201).send(JSON.stringify({
       status: account.status,
       contact: account.contact,
       "terms-of-service-agreed": account.termsOfServiceAgreed,

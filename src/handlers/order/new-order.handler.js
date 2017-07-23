@@ -63,7 +63,7 @@ export default ({
   }).then(({order, authorizations}) => {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Location", directoryService.getFullUrl(`/order/${order.id}`));
-    res.send(JSON.stringify({
+    res.status(201).send(JSON.stringify({
       status: order.status,
       expires: order.expires,
       csr: order.csr,
