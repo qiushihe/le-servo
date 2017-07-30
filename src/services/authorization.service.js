@@ -1,4 +1,5 @@
 import uuidV4 from "uuid/v4";
+import Promise from "bluebird";
 
 class AuthorizationService {
   constructor(options = {}) {
@@ -32,20 +33,31 @@ class AuthorizationService {
     });
   }
 
-  create({orderId, identifierType, identifierValue, status, expires}) {
+  create({accountId, orderId, identifierType, identifierValue, status, expires}) {
     return this.storage.get("authorizations").then((authorizations) => {
       return authorizations.create(uuidV4()).then(({id}) => {
         return authorizations.update(id, {
-          orderId, identifierType, identifierValue, status, expires
+          accountId, orderId, identifierType, identifierValue, status, expires
         });
       });
     }).then((authorization) => {
-      return this.challengeService.create({
-        authorizationId: authorization.id,
-        type: "http-01",
-        token: uuidV4().replace(/-/g, "")
-      })
-      .then(() => authorization);
+      return Promise.all([
+        this.challengeService.create({
+          authorizationId: authorization.id,
+          type: "http-01",
+          token: uuidV4().replace(/-/g, "")
+        }),
+        this.challengeService.create({
+          authorizationId: authorization.id,
+          type: "dns-01",
+          token: uuidV4().replace(/-/g, "")
+        }),
+        this.challengeService.create({
+          authorizationId: authorization.id,
+          type: "tls-sni-01",
+          token: uuidV4().replace(/-/g, "")
+        })
+      ]).then(() => authorization);
     });
   }
 
@@ -59,6 +71,7 @@ class AuthorizationService {
 AuthorizationService.storageAttributes = {
   name: "authorizations",
   attributes: [
+    {name: "accountId", defaultValue: null},
     {name: "orderId", defaultValue: null},
     {name: "identifierType", defaultValue: "dns"},
     {name: "identifierValue", defaultValue: null},

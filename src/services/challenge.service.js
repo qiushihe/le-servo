@@ -51,7 +51,9 @@ ChallengeService.storageAttributes = {
     {name: "validated", defaultValue: null},
     {name: "token", defaultValue: null},
     {name: "error", defaultValue: null},
-    {name: "keyAuthorization", defaultValue: null}
+    {name: "keyAuthorization", defaultValue: null},
+    // Used by v1 only; Because v1 doesn't have a "processing" status
+    {name: "processing", defaultValue: false}
   ]
 };
 

@@ -15,7 +15,8 @@ const getRequestContact = get("body.contact");
 
 export default ({
   directoryService,
-  accountService
+  accountService,
+  v1
 }) => (req, res) => {
   const onlyReturnExisting = getRequestOnlyReturnExisting(req);
   const termsOfServiceAgreed = getRequestTermsOfServiceAgreed(req);
@@ -38,11 +39,22 @@ export default ({
   .then((account) => {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Location", directoryService.getFullUrl(`/accounts/${account.id}`));
-    res.status(201).send(JSON.stringify({
-      status: account.status,
-      contact: account.contact,
-      "terms-of-service-agreed": account.termsOfServiceAgreed,
-      orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
-    })).end();
+    if (v1) {
+      res.setHeader("Link", `${directoryService.getFullUrl("/new-authz")};rel="next"`);
+      res.status(201).send(JSON.stringify({
+        key: key.toJSON(),
+        contact: account.contact,
+        "terms-of-service-agreed": account.termsOfServiceAgreed,
+        authorizations: directoryService.getFullUrl(`/accounts/${account.id}/authz`),
+        certificates: directoryService.getFullUrl(`/accounts/${account.id}/certs`)
+      })).end();
+    } else {
+      res.status(201).send(JSON.stringify({
+        status: account.status,
+        contact: account.contact,
+        "terms-of-service-agreed": account.termsOfServiceAgreed,
+        orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
+      })).end();
+    }
   }).catch(runtimeErrorResponse(res));
 };

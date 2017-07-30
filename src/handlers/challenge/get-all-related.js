@@ -11,7 +11,8 @@ export default ({
   challengeService,
   authorizationService,
   orderService,
-  accountService
+  accountService,
+  v1
 }) => {
   return challengeService.get(challengeId).catch(() => {
     throw new RuntimeError({
@@ -28,36 +29,57 @@ export default ({
       return {challenge, authorization};
     });
   }).then(({challenge, authorization}) => {
-    return orderService.get(authorization.orderId).catch(() => {
-      throw new RuntimeError({
-        message: "Challenge.Authorization.Order not found",
-        type: TYPE_NOT_FOUND
+    if (v1) {
+      return {challenge, authorization};
+    } else {
+      return orderService.get(authorization.orderId).catch(() => {
+        throw new RuntimeError({
+          message: "Challenge.Authorization.Order not found",
+          type: TYPE_NOT_FOUND
+        });
+      }).then((order) => {
+        return {challenge, authorization, order};
       });
-    }).then((order) => {
-      return {challenge, authorization, order};
-    });
+    }
   }).then(({challenge, authorization, order}) => {
-    return accountService.get(order.accountId).catch(() => {
-      throw new RuntimeError({
-        message: "Challenge.Authorization.Order.Account not found",
-        type: TYPE_NOT_FOUND
+    if (v1) {
+      return accountService.get(authorization.accountId).catch(() => {
+        throw new RuntimeError({
+          message: "Challenge.Authorization.Account not found",
+          type: TYPE_NOT_FOUND
+        });
+      }).then((account) => {
+        return {challenge, authorization, order, account};
       });
-    }).then((account) => {
-      if (key && account.kid !== key.kid) {
+    } else {
+      return accountService.get(order.accountId).catch(() => {
         throw new RuntimeError({
-          message: "Challenge.Authorization.Order.Account key mis-match",
-          type: TYPE_UNAUTHORIZED
+          message: "Challenge.Authorization.Order.Account not found",
+          type: TYPE_NOT_FOUND
         });
-      }
+      }).then((account) => {
+        return {challenge, authorization, order, account};
+      });
+    }
+  }).then(({challenge, authorization, order, account}) => {
+    if (key && account.kid !== key.kid) {
+      throw new RuntimeError({
+        message: v1
+          ? "Challenge.Authorization.Account key mis-match"
+          : "Challenge.Authorization.Order.Account key mis-match",
+        type: TYPE_UNAUTHORIZED
+      });
+    }
 
-      if (account.status === "deactivated") {
-        throw new RuntimeError({
-          message: "Challenge.Authorization.Order.Account deactivated",
-          type: TYPE_FORBIDDEN
-        });
-      }
+    if (account.status === "deactivated") {
+      throw new RuntimeError({
+        message: v1
+          ? "Challenge.Authorization.Account deactivated"
+          : "Challenge.Authorization.Order.Account deactivated",
+        type: TYPE_FORBIDDEN
+      });
+    }
 
-      return {challenge, authorization, order, account};
-    });
+    return {challenge, authorization, order, account};
   });
 };

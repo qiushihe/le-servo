@@ -8,13 +8,13 @@ class JoseService {
     this.keystore = JWK.createKeyStore();
   }
 
-  verify(jws = {}) {
+  verify(jws, {v1 = false} = {}) {
     return Promise.resolve().then(() => {
       const {
         protected: protectedHeader,
         payload,
         signature
-      } = jws;
+      } = (jws || {});
 
       if (isEmpty(protectedHeader) || isEmpty(payload) || isEmpty(signature)) {
         throw new Error("Invalid JWS");
@@ -40,8 +40,14 @@ class JoseService {
         throw new Error("Invalid header: Can not have both kid and jwk");
       }
 
-      if (isEmpty(alg) || isEmpty(nonce) || isEmpty(url)) {
-        throw new Error("Invalid header: Must have alg, nonce and url");
+      if (v1) {
+        if (isEmpty(alg) || isEmpty(nonce)) {
+          throw new Error("Invalid header: Must have alg and nonce");
+        }
+      } else {
+        if (isEmpty(alg) || isEmpty(nonce) || isEmpty(url)) {
+          throw new Error("Invalid header: Must have alg, nonce and url");
+        }
       }
 
       if (!isEmpty(kid)) {
