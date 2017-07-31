@@ -1,5 +1,6 @@
-import get from "lodash/fp/get";
 import base64url from "base64url";
+import get from "lodash/fp/get";
+import defer from "lodash/fp/defer";
 
 import {getJoseVerifiedKey} from "src/helpers/request.helper";
 import {
@@ -9,6 +10,8 @@ import {
   TYPE_UNPROCESSABLE_ENTITY
 } from "src/helpers/error.helper";
 import {runtimeErrorResponse} from  "src/helpers/response.helper";
+
+import {verify as verifyTLSSNI01} from "src/workers/tls-sni-01.verifier";
 
 import getAllRelated from "./get-all-related";
 
@@ -39,7 +42,7 @@ export default ({
     orderService,
     accountService,
     v1
-  }).then(({challenge, authorization, order, account}) => {
+  }).then(({challenge, authorization, order}) => {
     if (challenge.type !== "tls-sni-01") {
       throw new RuntimeError({
         message: "Challenge type unsupported",
@@ -95,7 +98,14 @@ export default ({
       });
     }
 
-    // TODO: Do something (spawn a worker?) to actually process the challenge
+    // TODO: Move this into a worker of sort.
+    defer(() => {
+      verifyTLSSNI01({
+        identifierType: authorization.identifierType,
+        identifierValue: authorization.identifierValue,
+        challengeKeyAuthorization: expectedKeyAuthorization
+      });
+    });
 
     const updatePayload = v1 ? {
       processing: true,
