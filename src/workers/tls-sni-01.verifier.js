@@ -1,6 +1,10 @@
 import tls from "tls";
 import crypto from "crypto";
 
+// Note: It appears that neither Boulder nor Traefik support the "iterations" attribute, `n` as
+//       described under section 7.3 of https://tools.ietf.org/html/draft-ietf-acme-acme-01.
+//       That's why I'm also not going to implement that here.
+
 export const verify = ({
   // identifierType,
   identifierValue,

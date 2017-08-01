@@ -44,16 +44,6 @@ class AuthorizationService {
       return Promise.all([
         this.challengeService.create({
           authorizationId: authorization.id,
-          type: "http-01",
-          token: uuidV4().replace(/-/g, "")
-        }),
-        this.challengeService.create({
-          authorizationId: authorization.id,
-          type: "dns-01",
-          token: uuidV4().replace(/-/g, "")
-        }),
-        this.challengeService.create({
-          authorizationId: authorization.id,
           type: "tls-sni-01",
           token: uuidV4().replace(/-/g, "")
         })

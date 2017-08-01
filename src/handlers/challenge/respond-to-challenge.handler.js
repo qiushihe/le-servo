@@ -77,18 +77,20 @@ export default ({
   }).then(({challenge, authorization, thumbprint}) => {
     const expectedKeyAuthorization = `${challenge.token}.${base64url(thumbprint)}`;
 
-    if (challengeToken !== challenge.token) {
-      throw new RuntimeError({
-        message: "Challenge token mis-match",
-        type: TYPE_UNAUTHORIZED
-      });
-    }
+    if (v1) {
+      if (challengeToken !== challenge.token) {
+        throw new RuntimeError({
+          message: "Challenge token mis-match",
+          type: TYPE_UNAUTHORIZED
+        });
+      }
 
-    if (challengeType !== challenge.type) {
-      throw new RuntimeError({
-        message: "Challenge type mis-match",
-        type: TYPE_UNAUTHORIZED
-      });
+      if (challengeType !== challenge.type) {
+        throw new RuntimeError({
+          message: "Challenge type mis-match",
+          type: TYPE_UNAUTHORIZED
+        });
+      }
     }
 
     if (challengeKeyAuthorization !== expectedKeyAuthorization) {
