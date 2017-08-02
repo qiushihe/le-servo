@@ -11,7 +11,6 @@ import {
 const newAccounthandler = ({
   directoryService,
   accountService,
-  v1,
   params: {
     onlyReturnExisting,
     termsOfServiceAgreed,
@@ -36,24 +35,12 @@ const newAccounthandler = ({
     return {
       contentType: "application/json",
       location: directoryService.getFullUrl(`/accounts/${account.id}`),
-      ...(v1 ? {
-        links: [`${directoryService.getFullUrl("/new-authz")};rel="next"`],
-        status: 201,
-        body: {
-          key: key.toJSON(),
-          contact: account.contact,
-          "terms-of-service-agreed": account.termsOfServiceAgreed,
-          authorizations: directoryService.getFullUrl(`/accounts/${account.id}/authz`),
-          certificates: directoryService.getFullUrl(`/accounts/${account.id}/certs`)
-        }
-      } : {
-        body: {
-          status: account.status,
-          contact: account.contact,
-          "terms-of-service-agreed": account.termsOfServiceAgreed,
-          orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
-        }
-      }),
+      body: {
+        status: account.status,
+        contact: account.contact,
+        "terms-of-service-agreed": account.termsOfServiceAgreed,
+        orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
+      }
     };
   });
 };

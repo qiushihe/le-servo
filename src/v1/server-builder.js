@@ -15,7 +15,7 @@ import joseVerify from "src/filters/jose-verify.filter";
 import useNonce from "src/filters/use-nonce.filter";
 
 import directory from "src/handlers/directory.handler";
-import newAccount from "src/handlers/account/new-account.handler";
+import newAccount from "src/v1/proxies/new-account-handler.proxy";
 import updateAccount from "src/handlers/account/update-account.handler";
 import newAuthorization from "src/handlers/authorization/new-authorization.handler";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
@@ -61,7 +61,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-reg", {
     method: "post",
     path: "/new-reg",
-    handler: handleRequest(newAccount, {directoryService, accountService, v1: true})
+    handler: handleRequest(newAccount, {directoryService, accountService})
   });
 
   directoryService.addField("new-authz", {
