@@ -40,8 +40,7 @@ export default ({
     challengeService,
     authorizationService,
     orderService,
-    accountService,
-    v1
+    accountService
   }).then(({challenge, authorization, order}) => {
     if (challenge.type !== "tls-sni-01") {
       throw new RuntimeError({

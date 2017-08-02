@@ -21,8 +21,7 @@ export default ({
     challengeService,
     authorizationService,
     orderService,
-    accountService,
-    v1
+    accountService
   }).then(({challenge, authorization}) => {
     const challengeUrl = directoryService.getFullUrl(`/authz/${authorization.id}/${challenge.id}`);
     res.setHeader("Content-Type", "application/json");
