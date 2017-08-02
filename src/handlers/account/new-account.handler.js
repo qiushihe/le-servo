@@ -7,23 +7,19 @@ import {
   TYPE_FORBIDDEN,
   TYPE_NOT_FOUND
 } from "src/helpers/error.helper";
-import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
-const getRequestOnlyReturnExisting = get("body.only-return-existing");
-const getRequestTermsOfServiceAgreed = get("body.terms-of-service-agreed");
-const getRequestContact = get("body.contact");
-
-export default ({
+const newAccounthandler = ({
   directoryService,
   accountService,
-  v1
-}) => (req, res) => {
-  const onlyReturnExisting = getRequestOnlyReturnExisting(req);
-  const termsOfServiceAgreed = getRequestTermsOfServiceAgreed(req);
-  const contact = getRequestContact(req);
-  const key = getJoseVerifiedKey(req);
-
-  accountService.find({kid: key.kid}).then((account) => {
+  v1,
+  params: {
+    onlyReturnExisting,
+    termsOfServiceAgreed,
+    contact,
+    key
+  }
+}) => {
+  return accountService.find({kid: key.kid}).then((account) => {
     if (!account && onlyReturnExisting) {
       throw new RuntimeError({message: "Account not found", type: TYPE_NOT_FOUND});
     }
@@ -37,24 +33,36 @@ export default ({
       : accountService.create({termsOfServiceAgreed, contact, key});
   })
   .then((account) => {
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Location", directoryService.getFullUrl(`/accounts/${account.id}`));
-    if (v1) {
-      res.setHeader("Link", `${directoryService.getFullUrl("/new-authz")};rel="next"`);
-      res.status(201).send(JSON.stringify({
-        key: key.toJSON(),
-        contact: account.contact,
-        "terms-of-service-agreed": account.termsOfServiceAgreed,
-        authorizations: directoryService.getFullUrl(`/accounts/${account.id}/authz`),
-        certificates: directoryService.getFullUrl(`/accounts/${account.id}/certs`)
-      })).end();
-    } else {
-      res.status(201).send(JSON.stringify({
-        status: account.status,
-        contact: account.contact,
-        "terms-of-service-agreed": account.termsOfServiceAgreed,
-        orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
-      })).end();
-    }
-  }).catch(runtimeErrorResponse(res));
+    return {
+      contentType: "application/json",
+      location: directoryService.getFullUrl(`/accounts/${account.id}`),
+      ...(v1 ? {
+        links: [`${directoryService.getFullUrl("/new-authz")};rel="next"`],
+        status: 201,
+        body: {
+          key: key.toJSON(),
+          contact: account.contact,
+          "terms-of-service-agreed": account.termsOfServiceAgreed,
+          authorizations: directoryService.getFullUrl(`/accounts/${account.id}/authz`),
+          certificates: directoryService.getFullUrl(`/accounts/${account.id}/certs`)
+        }
+      } : {
+        body: {
+          status: account.status,
+          contact: account.contact,
+          "terms-of-service-agreed": account.termsOfServiceAgreed,
+          orders: directoryService.getFullUrl(`/accounts/${account.id}/orders`)
+        }
+      }),
+    };
+  });
 };
+
+newAccounthandler.paramMap = {
+  onlyReturnExisting: get("body.only-return-existing"),
+  termsOfServiceAgreed: get("body.terms-of-service-agreed"),
+  contact: get("body.contact"),
+  key: getJoseVerifiedKey
+};
+
+export default newAccounthandler;

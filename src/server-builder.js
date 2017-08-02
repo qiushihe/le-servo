@@ -25,6 +25,8 @@ import respondToChallenge from "src/handlers/challenge/respond-to-challenge.hand
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
 
+import {handleRequest} from "src/helpers/server.helper";
+
 export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
@@ -66,7 +68,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-account", {
     method: "post",
     path: "/new-account",
-    handler: newAccount({directoryService, accountService})
+    handler: handleRequest(newAccount, {directoryService, accountService})
   });
 
   directoryService.addField("new-order", {

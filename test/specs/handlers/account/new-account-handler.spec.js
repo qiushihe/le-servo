@@ -2,6 +2,7 @@ import Promise from "bluebird";
 import request from "request-promise";
 
 import newAccount from "src/handlers/account/new-account.handler";
+import {handleRequest} from "src/helpers/server.helper";
 
 import {getServer} from "test/helpers/server.helper";
 import {async} from "test/helpers/test.helper";
@@ -31,7 +32,7 @@ describe("NewAccountHandler", () => {
           req.__leServoFilters = {jose: {verifiedKey: {kid: "verified-key-42", alg: "some-alg"}}};
           next();
         });
-        server.post("/new-account", newAccount({directoryService, accountService}));
+        server.post("/new-account", handleRequest(newAccount, {directoryService, accountService}));
       }
     });
   });

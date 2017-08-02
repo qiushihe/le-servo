@@ -22,6 +22,8 @@ import getAuthorization from "src/handlers/authorization/get-authorization.handl
 import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
 
+import {handleRequest} from "src/helpers/server.helper";
+
 export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
@@ -59,7 +61,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-reg", {
     method: "post",
     path: "/new-reg",
-    handler: newAccount({directoryService, accountService, v1: true})
+    handler: handleRequest(newAccount, {directoryService, accountService, v1: true})
   });
 
   directoryService.addField("new-authz", {
