@@ -17,7 +17,7 @@ import useNonce from "src/filters/use-nonce.filter";
 import directory from "src/handlers/directory.handler";
 import newAccount from "src/v1/proxies/new-account-handler.proxy";
 import updateAccount from "src/v1/proxies/update-account-handler.proxy";
-import newAuthorization from "src/handlers/authorization/new-authorization.handler";
+import newAuthorization from "src/v1/proxies/new-authorization-handler.proxy";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
 import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
@@ -67,12 +67,11 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-authz", {
     method: "post",
     path: "/new-authz",
-    handler: newAuthorization({
+    handler: handleRequest(newAuthorization, {
       accountService,
       authorizationService,
       challengeService,
-      directoryService,
-      v1: true
+      directoryService
     })
   });
 
