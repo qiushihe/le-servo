@@ -98,7 +98,10 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     server[method](path, handler);
   });
 
-  server.post("/accounts/:accound_id", updateAccount({directoryService, accountService}));
+  server.post("/accounts/:accound_id", handleRequest(updateAccount, {
+    directoryService,
+    accountService
+  }));
 
   server.get("/accounts/:accound_id/orders", getOrders({
     accountService,
