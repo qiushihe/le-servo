@@ -116,7 +116,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  server.get("/authz/:authorization_id", getAuthorization({
+  server.get("/authz/:authorization_id", handleRequest(getAuthorization, {
     challengeService,
     authorizationService,
     orderService,
