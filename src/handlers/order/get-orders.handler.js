@@ -43,7 +43,7 @@ const getOrdersHandler = ({
   });
 };
 
-getOrdersHandler.paramMap = {
+getOrdersHandler.requestParams = {
   accountId: get("params.account_id")
 };
 

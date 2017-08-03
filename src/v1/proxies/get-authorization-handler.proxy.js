@@ -32,6 +32,6 @@ const proxiedGetAuthorization = (request) => {
   });
 };
 
-proxiedGetAuthorization.paramMap = getAuthorization.paramMap;
+proxiedGetAuthorization.requestParams = getAuthorization.requestParams;
 
 export default proxiedGetAuthorization;

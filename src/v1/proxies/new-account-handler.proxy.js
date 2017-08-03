@@ -36,6 +36,6 @@ const proxiedNewAccount = (request) => {
   });
 };
 
-proxiedNewAccount.paramMap = newAccount.paramMap;
+proxiedNewAccount.requestParams = newAccount.requestParams;
 
 export default proxiedNewAccount;

@@ -47,7 +47,7 @@ const getAuthorizationHandler = ({
   });
 };
 
-getAuthorizationHandler.paramMap = {
+getAuthorizationHandler.requestParams = {
   authorizationId: get("params.authorization_id")
 };
 

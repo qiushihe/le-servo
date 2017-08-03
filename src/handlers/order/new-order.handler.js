@@ -75,7 +75,7 @@ const newOrderHandler = ({
   });
 };
 
-newOrderHandler.paramMap = {
+newOrderHandler.requestParams = {
   key: getJoseVerifiedKey,
   csr: get("body.csr"),
   notBefore: get("body.notBefore"),

@@ -35,6 +35,6 @@ const proxiedUpdateAccount = (request) => {
   });
 };
 
-proxiedUpdateAccount.paramMap = updateAccount.paramMap;
+proxiedUpdateAccount.requestParams = updateAccount.requestParams;
 
 export default proxiedUpdateAccount;

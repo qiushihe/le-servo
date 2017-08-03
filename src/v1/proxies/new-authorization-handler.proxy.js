@@ -32,6 +32,6 @@ const proxiedNewAuthorization = (request) => {
   });
 };
 
-proxiedNewAuthorization.paramMap = newAuthorization.paramMap;
+proxiedNewAuthorization.requestParams = newAuthorization.requestParams;
 
 export default proxiedNewAuthorization;

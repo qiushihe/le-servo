@@ -45,7 +45,7 @@ const newAccounthandler = ({
   });
 };
 
-newAccounthandler.paramMap = {
+newAccounthandler.requestParams = {
   onlyReturnExisting: get("body.only-return-existing"),
   termsOfServiceAgreed: get("body.terms-of-service-agreed"),
   contact: get("body.contact"),

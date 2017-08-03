@@ -67,7 +67,7 @@ const newAuthorizationHandler = ({
   });
 };
 
-newAuthorizationHandler.paramMap = {
+newAuthorizationHandler.requestParams = {
   identifierType: get("body.identifier.type"),
   identifierValue: get("body.identifier.value"),
   key: getJoseVerifiedKey

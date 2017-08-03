@@ -60,7 +60,7 @@ const getOrderHandler = ({
   });
 };
 
-getOrderHandler.paramMap = {
+getOrderHandler.requestParams = {
   orderId: get("params.order_id")
 };
 

@@ -60,7 +60,7 @@ const updateAccountHandler = ({
   });
 };
 
-updateAccountHandler.paramMap = {
+updateAccountHandler.requestParams = {
   accountId: get("params.accound_id"),
   contact: get("body.contact"),
   termsOfServiceAgreed: get("body.terms-of-service-agreed"),
