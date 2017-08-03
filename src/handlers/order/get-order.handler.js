@@ -6,19 +6,17 @@ import {
   TYPE_FORBIDDEN,
   TYPE_NOT_FOUND
 } from "src/helpers/error.helper";
-import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
-const getRequestOrderId = get("params.order_id");
-
-export default ({
+const getOrderHandler = ({
   accountService,
   orderService,
   authorizationService,
-  directoryService
-}) => (req, res) => {
-  const requestOrderId = getRequestOrderId(req);
-
-  orderService.get(requestOrderId).catch(() => {
+  directoryService,
+  params: {
+    orderId
+  }
+}) => {
+  return orderService.get(orderId).catch(() => {
     throw new RuntimeError({
       message: "Order not found",
       type: TYPE_NOT_FOUND
@@ -44,18 +42,26 @@ export default ({
       return {order, account, authorizations};
     });
   }).then(({order, authorizations}) => {
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Location", directoryService.getFullUrl(`/order/${order.id}`));
-    res.send(JSON.stringify({
-      status: order.status,
-      expires: order.expires,
-      csr: order.csr,
-      notBefore: order.notBefore,
-      notAfter: order.notAfter,
-      authorizations: map((authorization) => {
-        return directoryService.getFullUrl(`/authz/${authorization.id}`);
-      })(authorizations),
-      certificate: null // TODO: Implement this!
-    })).end();
-  }).catch(runtimeErrorResponse(res));
+    return {
+      contentType: "application/json",
+      location: directoryService.getFullUrl(`/order/${order.id}`),
+      body: {
+        status: order.status,
+        expires: order.expires,
+        csr: order.csr,
+        notBefore: order.notBefore,
+        notAfter: order.notAfter,
+        authorizations: map((authorization) => {
+          return directoryService.getFullUrl(`/authz/${authorization.id}`);
+        })(authorizations),
+        certificate: null // TODO: Implement this!
+      }
+    };
+  });
 };
+
+getOrderHandler.requestParams = {
+  orderId: get("params.order_id")
+};
+
+export default getOrderHandler;

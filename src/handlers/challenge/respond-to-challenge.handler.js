@@ -9,39 +9,32 @@ import {
   TYPE_PRECONDITION_FAILED,
   TYPE_UNPROCESSABLE_ENTITY
 } from "src/helpers/error.helper";
-import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
 import {verify as verifyTLSSNI01} from "src/workers/tls-sni-01.verifier";
 
 import getAllRelated from "./get-all-related";
 
-const getRequestChallengeId = get("params.challenge_id");
-const getRequestType = get("body.type");
-const getRequestToken = get("body.token");
-const getRequestKeyAuthorization = get("body.keyAuthorization");
-
-export default ({
+const respondToChallengeHandler = ({
   challengeService,
   authorizationService,
   orderService,
   accountService,
   directoryService,
-  v1
-}) => (req, res) => {
-  const key = getJoseVerifiedKey(req);
-  const challengeId = getRequestChallengeId(req);
-  const challengeType = getRequestType(req);
-  const challengeToken = getRequestToken(req);
-  const challengeKeyAuthorization = getRequestKeyAuthorization(req);
-
-  getAllRelated({
+  params: {
+    key,
+    challengeId,
+    challengeType,
+    challengeToken,
+    challengeKeyAuthorization
+  }
+}) => {
+  return getAllRelated({
     key,
     challengeId,
     challengeService,
     authorizationService,
     orderService,
-    accountService,
-    v1
+    accountService
   }).then(({challenge, authorization, order}) => {
     if (challenge.type !== "tls-sni-01") {
       throw new RuntimeError({
@@ -64,7 +57,7 @@ export default ({
       });
     }
 
-    if (!v1 && order.status !== "pending") {
+    if (order && order.status !== "pending") {
       throw new RuntimeError({
         message: "Challenge.Authorization.Order status unexpected",
         type: TYPE_PRECONDITION_FAILED
@@ -77,20 +70,18 @@ export default ({
   }).then(({challenge, authorization, thumbprint}) => {
     const expectedKeyAuthorization = `${challenge.token}.${base64url(thumbprint)}`;
 
-    if (v1) {
-      if (challengeToken !== challenge.token) {
-        throw new RuntimeError({
-          message: "Challenge token mis-match",
-          type: TYPE_UNAUTHORIZED
-        });
-      }
+    if (challengeToken && challengeToken !== challenge.token) {
+      throw new RuntimeError({
+        message: "Challenge token mis-match",
+        type: TYPE_UNAUTHORIZED
+      });
+    }
 
-      if (challengeType !== challenge.type) {
-        throw new RuntimeError({
-          message: "Challenge type mis-match",
-          type: TYPE_UNAUTHORIZED
-        });
-      }
+    if (challengeType && challengeType !== challenge.type) {
+      throw new RuntimeError({
+        message: "Challenge type mis-match",
+        type: TYPE_UNAUTHORIZED
+      });
     }
 
     if (challengeKeyAuthorization !== expectedKeyAuthorization) {
@@ -109,7 +100,8 @@ export default ({
       });
     });
 
-    const updatePayload = v1 ? {
+    // Having no `order` means it's v1
+    const updatePayload = !challenge.order ? {
       processing: true,
       status: "pending",
       keyAuthorization: expectedKeyAuthorization
@@ -123,26 +115,27 @@ export default ({
     });
   }).then(({challenge, authorization}) => {
     const challengeUrl = directoryService.getFullUrl(`/authz/${authorization.id}/${challenge.id}`);
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Location", challengeUrl);
-    if (v1) {
-      res.status(202).send(JSON.stringify({
-        type: challenge.type,
-        uri: challengeUrl,
-        status: challenge.status,
-        validated: challenge.validated,
-        token: challenge.token,
-        keyAuthorization: challenge.keyAuthorization
-      })).end();
-    } else {
-      res.send(JSON.stringify({
+    return {
+      contentType: "application/json",
+      location: challengeUrl,
+      body: {
         type: challenge.type,
         url: challengeUrl,
         status: challenge.status,
         validated: challenge.validated,
         token: challenge.token,
         keyAuthorization: challenge.keyAuthorization
-      })).end();
-    }
-  }).catch(runtimeErrorResponse(res));
+      }
+    };
+  });
 };
+
+respondToChallengeHandler.requestParams = {
+  key: getJoseVerifiedKey,
+  challengeId: get("params.challenge_id"),
+  challengeType: get("body.type"),
+  challengeToken: get("body.token"),
+  challengeKeyAuthorization: get("body.keyAuthorization")
+};
+
+export default respondToChallengeHandler;

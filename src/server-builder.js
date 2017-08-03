@@ -25,6 +25,8 @@ import respondToChallenge from "src/handlers/challenge/respond-to-challenge.hand
 import getChallenge from "src/handlers/challenge/get-challenge.handler";
 import getAuthorization from "src/handlers/authorization/get-authorization.handler";
 
+import {handleRequest} from "src/helpers/server.helper";
+
 export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
@@ -60,19 +62,19 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-nonce", {
     method: "all",
     path: "/new-nonce",
-    handler: empty
+    handler: handleRequest(empty)
   });
 
   directoryService.addField("new-account", {
     method: "post",
     path: "/new-account",
-    handler: newAccount({directoryService, accountService})
+    handler: handleRequest(newAccount, {directoryService, accountService})
   });
 
   directoryService.addField("new-order", {
     method: "post",
     path: "/new-order",
-    handler: newOrder({
+    handler: handleRequest(newOrder, {
       accountService,
       orderService,
       authorizationService,
@@ -90,28 +92,31 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.use(joseVerify({joseService}));
   server.use(useNonce({nonceService}));
 
-  server.get("/directory", directory({directoryService}));
+  server.get("/directory", handleRequest(directory, {directoryService}));
 
   directoryService.each((_, {method, path, handler}) => {
     server[method](path, handler);
   });
 
-  server.post("/accounts/:accound_id", updateAccount({directoryService, accountService}));
+  server.post("/accounts/:accound_id", handleRequest(updateAccount, {
+    directoryService,
+    accountService
+  }));
 
-  server.get("/accounts/:accound_id/orders", getOrders({
+  server.get("/accounts/:accound_id/orders", handleRequest(getOrders, {
     accountService,
     orderService,
     directoryService
   }));
 
-  server.get("/order/:order_id", getOrder({
+  server.get("/order/:order_id", handleRequest(getOrder, {
     accountService,
     orderService,
     authorizationService,
     directoryService
   }));
 
-  server.get("/authz/:authorization_id", getAuthorization({
+  server.get("/authz/:authorization_id", handleRequest(getAuthorization, {
     challengeService,
     authorizationService,
     orderService,
@@ -119,7 +124,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  server.post("/authz/:authorization_id/:challenge_id", respondToChallenge({
+  server.post("/authz/:authorization_id/:challenge_id", handleRequest(respondToChallenge, {
     challengeService,
     authorizationService,
     orderService,
@@ -127,7 +132,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  server.get("/authz/:authorization_id/:challenge_id", getChallenge({
+  server.get("/authz/:authorization_id/:challenge_id", handleRequest(getChallenge, {
     challengeService,
     authorizationService,
     orderService,

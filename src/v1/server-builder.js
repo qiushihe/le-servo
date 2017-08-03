@@ -15,12 +15,14 @@ import joseVerify from "src/filters/jose-verify.filter";
 import useNonce from "src/filters/use-nonce.filter";
 
 import directory from "src/handlers/directory.handler";
-import newAccount from "src/handlers/account/new-account.handler";
-import updateAccount from "src/handlers/account/update-account.handler";
-import newAuthorization from "src/handlers/authorization/new-authorization.handler";
-import getAuthorization from "src/handlers/authorization/get-authorization.handler";
-import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
-import getChallenge from "src/handlers/challenge/get-challenge.handler";
+import newAccount from "src/v1/proxies/new-account-handler.proxy";
+import updateAccount from "src/v1/proxies/update-account-handler.proxy";
+import newAuthorization from "src/v1/proxies/new-authorization-handler.proxy";
+import getAuthorization from "src/v1/proxies/get-authorization-handler.proxy";
+import respondToChallenge from "src/v1/proxies/respond-to-challenge-handler.proxy";
+import getChallenge from "src/v1/proxies/get-challenge-handler.proxy";
+
+import {handleRequest} from "src/helpers/server.helper";
 
 export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
@@ -59,18 +61,17 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-reg", {
     method: "post",
     path: "/new-reg",
-    handler: newAccount({directoryService, accountService, v1: true})
+    handler: handleRequest(newAccount, {directoryService, accountService})
   });
 
   directoryService.addField("new-authz", {
     method: "post",
     path: "/new-authz",
-    handler: newAuthorization({
+    handler: handleRequest(newAuthorization, {
       accountService,
       authorizationService,
       challengeService,
-      directoryService,
-      v1: true
+      directoryService
     })
   });
 
@@ -103,43 +104,39 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.use(joseVerify({joseService, v1: true}));
   server.use(useNonce({nonceService}));
 
-  server.get("/directory", directory({directoryService}));
+  server.get("/directory", handleRequest(directory, {directoryService}));
 
   directoryService.each((_, {method, path, handler}) => {
     server[method](path, handler);
   });
 
-  server.post("/accounts/:accound_id", updateAccount({
+  server.post("/accounts/:accound_id", handleRequest(updateAccount, {
     directoryService,
-    accountService,
-    v1: true
+    accountService
   }));
 
-  server.get("/authz/:authorization_id", getAuthorization({
+  server.get("/authz/:authorization_id", handleRequest(getAuthorization, {
     challengeService,
     authorizationService,
     orderService,
     accountService,
-    directoryService,
-    v1: true
+    directoryService
   }));
 
-  server.post("/authz/:authorization_id/:challenge_id", respondToChallenge({
+  server.post("/authz/:authorization_id/:challenge_id", handleRequest(respondToChallenge, {
     challengeService,
     authorizationService,
     orderService,
     accountService,
-    directoryService,
-    v1: true
+    directoryService
   }));
 
-  server.get("/authz/:authorization_id/:challenge_id", getChallenge({
+  server.get("/authz/:authorization_id/:challenge_id", handleRequest(getChallenge, {
     challengeService,
     authorizationService,
     orderService,
     accountService,
-    directoryService,
-    v1: true
+    directoryService
   }));
 
   return server;

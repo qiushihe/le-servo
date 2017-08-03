@@ -1,50 +1,42 @@
 import get from "lodash/fp/get";
 
-import {runtimeErrorResponse} from  "src/helpers/response.helper";
-
-const getRequestChallengeId = get("params.challenge_id");
-
 import getAllRelated from "./get-all-related";
 
-export default ({
+const getChallengeHandler = ({
   challengeService,
   authorizationService,
   orderService,
   accountService,
   directoryService,
-  v1
-}) => (req, res) => {
-  const challengeId = getRequestChallengeId(req);
-
-  getAllRelated({
+  params: {
+    challengeId
+  }
+}) => {
+  return getAllRelated({
     challengeId,
     challengeService,
     authorizationService,
     orderService,
-    accountService,
-    v1
+    accountService
   }).then(({challenge, authorization}) => {
     const challengeUrl = directoryService.getFullUrl(`/authz/${authorization.id}/${challenge.id}`);
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Location", challengeUrl);
-    if (v1) {
-      res.status(challenge.processing ? 202 : 200).send(JSON.stringify({
+    return {
+      contentType: "application/json",
+      location: challengeUrl,
+      body: {
         type: challenge.type,
         url: challengeUrl,
         status: challenge.status,
         validated: challenge.validated,
         token: challenge.token,
         keyAuthorization: challenge.keyAuthorization
-      })).end();
-    } else {
-      res.send(JSON.stringify({
-        type: challenge.type,
-        url: challengeUrl,
-        status: challenge.status,
-        validated: challenge.validated,
-        token: challenge.token,
-        keyAuthorization: challenge.keyAuthorization
-      })).end();
-    }
-  }).catch(runtimeErrorResponse(res));
+      }
+    };
+  })
 };
+
+getChallengeHandler.requestParams = {
+  challengeId: get("params.challenge_id")
+};
+
+export default getChallengeHandler;
