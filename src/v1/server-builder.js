@@ -19,7 +19,7 @@ import newAccount from "src/v1/proxies/new-account-handler.proxy";
 import updateAccount from "src/v1/proxies/update-account-handler.proxy";
 import newAuthorization from "src/v1/proxies/new-authorization-handler.proxy";
 import getAuthorization from "src/v1/proxies/get-authorization-handler.proxy";
-import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
+import respondToChallenge from "src/v1/proxies/respond-to-challenge-handler.proxy";
 import getChallenge from "src/v1/proxies/get-challenge-handler.proxy";
 
 import {handleRequest} from "src/helpers/server.helper";
@@ -123,13 +123,12 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  server.post("/authz/:authorization_id/:challenge_id", respondToChallenge({
+  server.post("/authz/:authorization_id/:challenge_id", handleRequest(respondToChallenge, {
     challengeService,
     authorizationService,
     orderService,
     accountService,
-    directoryService,
-    v1: true
+    directoryService
   }));
 
   server.get("/authz/:authorization_id/:challenge_id", handleRequest(getChallenge, {

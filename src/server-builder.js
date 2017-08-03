@@ -124,7 +124,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  server.post("/authz/:authorization_id/:challenge_id", respondToChallenge({
+  server.post("/authz/:authorization_id/:challenge_id", handleRequest(respondToChallenge, {
     challengeService,
     authorizationService,
     orderService,

@@ -1,9 +1,9 @@
-import getChallenge from "src/handlers/challenge/get-challenge.handler";
+import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
 
-const proxiedGetChallengeHandler = (request) => {
+const proxiedRespondToChallengeHandler = (request) => {
   const {challengeService} = request;
 
-  return getChallenge(request).then((respond) => {
+  return respondToChallenge(request).then((respond) => {
     const {
       location,
       body: {
@@ -27,6 +27,6 @@ const proxiedGetChallengeHandler = (request) => {
   });
 };
 
-proxiedGetChallengeHandler.requestParams = getChallenge.requestParams;
+proxiedRespondToChallengeHandler.requestParams = respondToChallenge.requestParams;
 
-export default proxiedGetChallengeHandler;
+export default proxiedRespondToChallengeHandler;
