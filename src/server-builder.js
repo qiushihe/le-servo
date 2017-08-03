@@ -132,7 +132,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  server.get("/authz/:authorization_id/:challenge_id", getChallenge({
+  server.get("/authz/:authorization_id/:challenge_id", handleRequest(getChallenge, {
     challengeService,
     authorizationService,
     orderService,
