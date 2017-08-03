@@ -104,7 +104,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.use(joseVerify({joseService, v1: true}));
   server.use(useNonce({nonceService}));
 
-  server.get("/directory", directory({directoryService}));
+  server.get("/directory", handleRequest(directory, {directoryService}));
 
   directoryService.each((_, {method, path, handler}) => {
     server[method](path, handler);
