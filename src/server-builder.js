@@ -74,7 +74,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-order", {
     method: "post",
     path: "/new-order",
-    handler: newOrder({
+    handler: handleRequest(newOrder, {
       accountService,
       orderService,
       authorizationService,
@@ -103,13 +103,13 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     accountService
   }));
 
-  server.get("/accounts/:accound_id/orders", getOrders({
+  server.get("/accounts/:accound_id/orders", handleRequest(getOrders, {
     accountService,
     orderService,
     directoryService
   }));
 
-  server.get("/order/:order_id", getOrder({
+  server.get("/order/:order_id", handleRequest(getOrder, {
     accountService,
     orderService,
     authorizationService,

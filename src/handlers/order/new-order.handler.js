@@ -9,24 +9,20 @@ import {
   TYPE_FORBIDDEN,
   TYPE_NOT_FOUND
 } from "src/helpers/error.helper";
-import {runtimeErrorResponse} from  "src/helpers/response.helper";
 
-const getRequestCsr = get("body.csr");
-const getRequestNotBefore = get("body.notBefore");
-const getRequestNotAfter = get("body.notAfter");
-
-export default ({
+const newOrderHandler = ({
   accountService,
   orderService,
   authorizationService,
-  directoryService
-}) => (req, res) => {
-  const key = getJoseVerifiedKey(req);
-  const requestCsr = getRequestCsr(req);
-  const requestNotBefore = getRequestNotBefore(req);
-  const requestNotAfter = getRequestNotAfter(req);
-
-  accountService.find({kid: key.kid}).then((account) => {
+  directoryService,
+  params: {
+    key,
+    csr,
+    notBefore,
+    notAfter
+  }
+}) => {
+  return accountService.find({kid: key.kid}).then((account) => {
     if (!account) {
       throw new RuntimeError({
         message: "Account not found",
@@ -43,7 +39,7 @@ export default ({
 
     return account;
   }).then((account) => {
-    if (isEmpty(requestCsr)) {
+    if (isEmpty(csr)) {
       throw new RuntimeError({
         message: "CSR must not be empty",
         type: TYPE_BAD_REQUEST
@@ -52,26 +48,38 @@ export default ({
 
     return orderService.create({
       accountId: account.id,
-      csr: requestCsr,
-      notBefore: requestNotBefore,
-      notAfter: requestNotAfter
+      csr,
+      notBefore,
+      notAfter
     });
   }).then((order) => {
     return authorizationService.filter({orderId: order.id}).then((authorizations) => {
       return {order, authorizations};
     });
   }).then(({order, authorizations}) => {
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Location", directoryService.getFullUrl(`/order/${order.id}`));
-    res.status(201).send(JSON.stringify({
-      status: order.status,
-      expires: order.expires,
-      csr: order.csr,
-      notBefore: order.notBefore,
-      notAfter: order.notAfter,
-      authorizations: map((authorization) => {
-        return directoryService.getFullUrl(`/authz/${authorization.id}`);
-      })(authorizations)
-    })).end();
-  }).catch(runtimeErrorResponse(res));
+    return {
+      contentType: "application/json",
+      location: directoryService.getFullUrl(`/order/${order.id}`),
+      status: 201,
+      body: {
+        status: order.status,
+        expires: order.expires,
+        csr: order.csr,
+        notBefore: order.notBefore,
+        notAfter: order.notAfter,
+        authorizations: map((authorization) => {
+          return directoryService.getFullUrl(`/authz/${authorization.id}`);
+        })(authorizations)
+      }
+    };
+  });
 };
+
+newOrderHandler.paramMap = {
+  key: getJoseVerifiedKey,
+  csr: get("body.csr"),
+  notBefore: get("body.notBefore"),
+  notAfter: get("body.notAfter")
+};
+
+export default newOrderHandler;
