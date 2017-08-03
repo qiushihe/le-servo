@@ -62,7 +62,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-nonce", {
     method: "all",
     path: "/new-nonce",
-    handler: empty
+    handler: handleRequest(empty)
   });
 
   directoryService.addField("new-account", {

@@ -10,7 +10,7 @@ export const handleRequest = (handler, options) => (req, res) => {
   handler({
     params: reduce((result, getter, name) => {
       return {...result, [name]: getter(req)};
-    }, {})(handler.requestParams),
+    }, {})(handler.requestParams || {}),
     ...(options || {})
   }).then(({
     contentType,
