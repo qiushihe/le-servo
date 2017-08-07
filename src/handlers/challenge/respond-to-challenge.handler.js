@@ -102,6 +102,10 @@ const respondToChallengeHandler = ({
 
     // Having no `order` means it's v1
     const updatePayload = !challenge.order ? {
+      // According to https://tools.ietf.org/html/draft-ietf-acme-acme-02#section-7 the `status`
+      // attribute of a challenge can not be `processing` therefore we have to keep the `status`
+      // as `pending` and use a `processing` attribute to keep track of the challenges that are
+      // being processed.
       processing: true,
       status: "pending",
       keyAuthorization: expectedKeyAuthorization

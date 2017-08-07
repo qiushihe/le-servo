@@ -138,7 +138,7 @@ describe("Integration Test", () => {
             resolveWithFullResponse: true
           });
         }).then((res) => {
-          expect(res.body).to.have.property("status", "processing");
+          expect(res.body).to.have.property("status", "pending");
         });
       });
     })
