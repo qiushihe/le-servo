@@ -8,14 +8,14 @@ import {async} from "test/helpers/test.helper";
 describe("CsrHelper", () => {
   describe("#parseCsr()", () => {
     it("should parse names for CSR", async(() => (
-      parseCsr(lalaDotCom).then((result) => {
-        expect(result).to.deep.equal(["lala.com"]);
+      parseCsr(lalaDotCom).then(({domains}) => {
+        expect(domains).to.deep.equal(["lala.com"]);
       })
     )));
 
     it("should parse extension names for CSR", async(() => (
-      parseCsr(notExampleDotCom).then((result) => {
-        expect(result).to.deep.equal(["not-example.com", "www.not-example.com"]);
+      parseCsr(notExampleDotCom).then(({domains}) => {
+        expect(domains).to.deep.equal(["not-example.com", "www.not-example.com"]);
       })
     )));
   });

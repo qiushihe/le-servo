@@ -1,5 +1,4 @@
 import {convert as convertReduce} from "lodash/fp/reduce";
-import each from "lodash/fp/each";
 import isEmpty from "lodash/fp/isEmpty";
 
 import {runtimeErrorResponse} from  "src/helpers/response.helper";
@@ -28,9 +27,9 @@ export const handleRequest = (handler, options) => (req, res) => {
       res.setHeader("Location", location);
     }
 
-    each((link) => {
-      res.setHeader("Link", link);
-    })(links);
+    if (!isEmpty(links)) {
+      res.setHeader("Link", links);
+    }
 
     if (!isEmpty(retryAfter)) {
       res.setHeader("Retry-After", retryAfter);

@@ -29,10 +29,12 @@ export const parseCsr = (encodedCsr) => Promise.resolve().then(() => {
     (str) => (`-----BEGIN CERTIFICATE REQUEST-----\n${str}\n-----END CERTIFICATE REQUEST-----\n`)
   ])(encodedCsr);
 
+  const parsedCsr = PKI.certificationRequestFromPem(pem);
+
   const {
     subject: {attributes: subjectAttributes = []} = {},
     attributes = []
-  } = PKI.certificationRequestFromPem(pem);
+  } = parsedCsr;
 
   const commonNames = flow([
     filter({name: "commonName"}),
@@ -52,8 +54,10 @@ export const parseCsr = (encodedCsr) => Promise.resolve().then(() => {
     map("value")
   ])(attributes);
 
-  return flow([
+  const domains = flow([
     uniq,
     filter((domain) => domainRegExp.test(domain))
   ])([...commonNames, ...extensionNames]);
+
+  return {csr: parsedCsr, domains};
 });

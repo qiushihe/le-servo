@@ -42,12 +42,14 @@ class OrderService {
         return orders.update(id, {accountId, csr, notBefore, notAfter});
       });
     }).then((order) => {
-      return parseCsr(csr).then(map((domain) => (
-        this.authorizationService.create({
-          orderId: order.id,
-          identifierValue: domain
-        })
-      )))
+      return parseCsr(csr).then(({domains}) => {
+        return map((domain) => (
+          this.authorizationService.create({
+            orderId: order.id,
+            identifierValue: domain
+          })
+        ))(domains);
+      })
       .then(Promise.all)
       .then(() => order);
     });

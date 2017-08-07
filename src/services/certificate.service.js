@@ -27,17 +27,17 @@ class CertificateService {
     });
   }
 
-  create({orderId, status, authorizationId, csr}) {
+  create({orderId, status, pem, authorizationId, csr}) {
     return this.storage.get("certificates").then((certificates) => {
       return certificates.create(uuidV4()).then(({id}) => {
-        return certificates.update(id, {orderId, status, authorizationId, csr});
+        return certificates.update(id, {orderId, status, pem, authorizationId, csr});
       });
     });
   }
 
-  update(id, {orderId, status, authorizationId, csr}) {
+  update(id, {orderId, status, pem, authorizationId, csr}) {
     return this.storage.get("certificates").then((certificates) => {
-      return certificates.update(id, {orderId, status, authorizationId, csr});
+      return certificates.update(id, {orderId, status, pem, authorizationId, csr});
     });
   }
 }
@@ -47,6 +47,7 @@ CertificateService.storageAttributes = {
   attributes: [
     {name: "orderId", defaultValue: null},
     {name: "status", defaultValue: "pending"},
+    {name: "pem", defaultValue: null},
     // Only v1 uses these because v1 doesn't have `order`
     {name: "authorizationId", defaultValue: null},
     {name: "csr", defaultValue: null}

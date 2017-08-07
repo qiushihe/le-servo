@@ -22,6 +22,7 @@ import getAuthorization from "src/v1/proxies/get-authorization-handler.proxy";
 import respondToChallenge from "src/v1/proxies/respond-to-challenge-handler.proxy";
 import getChallenge from "src/v1/proxies/get-challenge-handler.proxy";
 import newCertificate from "src/v1/handlers/certificate/new-certificate.handler";
+import getCertificate from "src/v1/handlers/certificate/get-certificate.handler";
 
 import {handleRequest} from "src/helpers/server.helper";
 
@@ -138,10 +139,10 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  server.get("/cert/:certificate_id", (req, res) => {
-    console.log("** get-cert", req.params.certificate_id);
-    res.status(204).end();
-  });
+  server.get("/cert/:certificate_id", handleRequest(getCertificate, {
+    certificateService,
+    directoryService
+  }));
 
   return server;
 };
