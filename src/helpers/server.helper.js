@@ -16,6 +16,7 @@ export const handleRequest = (handler, options) => (req, res) => {
     contentType,
     location,
     links,
+    retryAfter,
     status,
     body,
   }) => {
@@ -30,6 +31,10 @@ export const handleRequest = (handler, options) => (req, res) => {
     each((link) => {
       res.setHeader("Link", link);
     })(links);
+
+    if (!isEmpty(retryAfter)) {
+      res.setHeader("Retry-After", retryAfter);
+    }
 
     if (status) {
       res = res.status(status);

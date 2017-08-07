@@ -54,5 +54,11 @@ export const verify = ({
       : {processing: false, status: "invalid"};
 
     return challengeService.update(challengeId, updatePayload);
+  }).then((updatedChallenge) => {
+    // TODO: Technically we should only mark authorization as valid if the combination requirement
+    //       is satisfied.
+    return authorizationService.update(updatedChallenge.authorizationId, {
+      status: "valid"
+    });
   });
 };

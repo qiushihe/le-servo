@@ -7,7 +7,7 @@ import CollectionService from "src/services/collection.service";
 import AccountService from "src/services/account.service";
 import ChallengeService from "src/services/challenge.service";
 import AuthorizationService from "src/services/authorization.service";
-import OrderService from "src/services/order.service";
+import CertificateService from "src/services/certificate.service";
 
 import logging from "src/filters/logging.filter";
 import newNonce from "src/filters/new-nonce.filter";
@@ -21,6 +21,7 @@ import newAuthorization from "src/v1/proxies/new-authorization-handler.proxy";
 import getAuthorization from "src/v1/proxies/get-authorization-handler.proxy";
 import respondToChallenge from "src/v1/proxies/respond-to-challenge-handler.proxy";
 import getChallenge from "src/v1/proxies/get-challenge-handler.proxy";
+import newCertificate from "src/v1/handlers/certificate/new-certificate.handler";
 
 import {handleRequest} from "src/helpers/server.helper";
 
@@ -33,7 +34,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
       {...AccountService.storageAttributes},
       {...AuthorizationService.storageAttributes},
       {...ChallengeService.storageAttributes},
-      {...OrderService.storageAttributes}
+      {...CertificateService.storageAttributes}
     ]
   });
 
@@ -51,8 +52,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     storage: collectionService
   });
 
-  const orderService = new OrderService({
-    authorizationService,
+  const certificateService = new CertificateService({
     storage: collectionService
   });
 
@@ -78,10 +78,12 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   directoryService.addField("new-cert", {
     method: "post",
     path: "/new-cert",
-    handler: (req, res) => {
-      console.log("** new-cert", req.body);
-      res.status(204).end();
-    }
+    handler: handleRequest(newCertificate, {
+      accountService,
+      authorizationService,
+      certificateService,
+      directoryService
+    })
   });
 
   directoryService.addField("revoke-cert", {
@@ -118,7 +120,6 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.get("/authz/:authorization_id", handleRequest(getAuthorization, {
     challengeService,
     authorizationService,
-    orderService,
     accountService,
     directoryService
   }));
@@ -126,7 +127,6 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.post("/authz/:authorization_id/:challenge_id", handleRequest(respondToChallenge, {
     challengeService,
     authorizationService,
-    orderService,
     accountService,
     directoryService
   }));
@@ -134,10 +134,14 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.get("/authz/:authorization_id/:challenge_id", handleRequest(getChallenge, {
     challengeService,
     authorizationService,
-    orderService,
     accountService,
     directoryService
   }));
+
+  server.get("/cert/:certificate_id", (req, res) => {
+    console.log("** get-cert", req.params.certificate_id);
+    res.status(204).end();
+  });
 
   return server;
 };
