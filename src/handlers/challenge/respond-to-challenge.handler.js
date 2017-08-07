@@ -91,15 +91,6 @@ const respondToChallengeHandler = ({
       });
     }
 
-    // TODO: Move this into a worker of sort.
-    defer(() => {
-      verifyTLSSNI01({
-        identifierType: authorization.identifierType,
-        identifierValue: authorization.identifierValue,
-        challengeKeyAuthorization: expectedKeyAuthorization
-      });
-    });
-
     // Having no `order` means it's v1
     const updatePayload = !challenge.order ? {
       // According to https://tools.ietf.org/html/draft-ietf-acme-acme-02#section-7 the `status`
@@ -115,6 +106,15 @@ const respondToChallengeHandler = ({
     };
 
     return challengeService.update(challenge.id, updatePayload).then((updatedChallenge) => {
+      // TODO: Move this into a worker of sort.
+      defer(() => {
+        verifyTLSSNI01({
+          authorizationService,
+          challengeService,
+          challengeId: updatedChallenge.id
+        });
+      });
+
       return {challenge: updatedChallenge, authorization};
     });
   }).then(({challenge, authorization}) => {
