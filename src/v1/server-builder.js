@@ -140,6 +140,8 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   }));
 
   server.get("/cert/:certificate_id", handleRequest(getCertificate, {
+    accountService,
+    authorizationService,
     certificateService,
     directoryService
   }));
