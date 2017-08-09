@@ -57,8 +57,12 @@ export const verify = ({
   }).then((updatedChallenge) => {
     // TODO: Technically we should only mark authorization as valid if the combination requirement
     //       is satisfied.
-    return authorizationService.update(updatedChallenge.authorizationId, {
-      status: "valid"
-    });
+    if (updatedChallenge.status === "valid") {
+      return authorizationService.update(updatedChallenge.authorizationId, {
+        status: "valid"
+      });
+    } else {
+      return Promise.resolve();
+    }
   });
 };
