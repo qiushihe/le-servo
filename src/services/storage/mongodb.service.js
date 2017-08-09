@@ -9,7 +9,14 @@ import isUndefined from "lodash/fp/isUndefined";
 import first from "lodash/fp/first";
 import {MongoClient} from "mongodb";
 
-const recordWithId = ({_id, ...recordAttributes}) => ({...recordAttributes, id: _id});
+const recordWithId = (record) => {
+  if (record) {
+    const {_id, ...recordAttributes} = record;
+    return {...recordAttributes, id: _id};
+  } else {
+    return record;
+  }
+};
 
 class MongoDBCollectionService {
   constructor(collection, options) {
