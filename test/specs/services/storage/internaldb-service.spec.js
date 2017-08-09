@@ -1,12 +1,13 @@
-import RecordService from "src/services/storage/record.service";
+import InternalDBService from "src/services/storage/internaldb.service";
+import {InternalDBCollectionService} from "src/services/storage/internaldb.service";
 
 import {async} from "test/helpers/test.helper";
 
-describe("RecordService", () => {
+describe("InternalDBCollectionService", () => {
   let service;
 
   beforeEach(() => {
-    service = new RecordService({
+    service = new InternalDBCollectionService({
       attributes: [
         {name: "title", defaultValue: "Record title"},
         {name: "score", defaultValue: 0}
@@ -158,4 +159,32 @@ describe("RecordService", () => {
       })
     ));
   });
+});
+
+
+describe("InternalDBService", () => {
+  let service;
+
+  beforeEach(() => {
+    service = new InternalDBService({
+      records: [{
+        name: "record1",
+        attributes: [{name: "title", defaultValue: "R1 title"}]
+      }, {
+        name: "record2",
+        attributes: [{name: "title", defaultValue: "R2 title"}]
+      }]
+    });
+  });
+
+  it("should provide access to defined collections", async(() => (
+    service.get("record1")
+      .then((record1s) => {
+        expect(record1s).to.be.ok;
+      })
+      .then(() => service.get("record2"))
+      .then((record2s) => {
+        expect(record2s).to.be.ok;
+      })
+  )));
 });

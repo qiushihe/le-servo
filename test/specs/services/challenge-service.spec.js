@@ -1,4 +1,4 @@
-import CollectionService from "src/services/storage/collection.service";
+import InternalDBService from "src/services/storage/internaldb.service";
 import ChallengeService from "src/services/challenge.service";
 
 import {async} from "test/helpers/test.helper";
@@ -8,7 +8,7 @@ describe("ChallengeService", () => {
 
   beforeEach(() => {
     service = new ChallengeService({
-      storage: new CollectionService({
+      storage: new InternalDBService({
         records: [{...ChallengeService.storageAttributes}]
       })
     });

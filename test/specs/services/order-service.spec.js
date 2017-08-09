@@ -1,6 +1,6 @@
 import Promise from "bluebird";
 
-import CollectionService from "src/services/storage/collection.service";
+import InternalDBService from "src/services/storage/internaldb.service";
 import OrderService from "src/services/order.service";
 
 import {async} from "test/helpers/test.helper";
@@ -22,7 +22,7 @@ describe("OrderService", () => {
 
     service = new OrderService({
       authorizationService,
-      storage: new CollectionService({
+      storage: new InternalDBService({
         records: [{...OrderService.storageAttributes}]
       })
     });

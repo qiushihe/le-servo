@@ -11,7 +11,7 @@ import isEmpty from "lodash/fp/isEmpty";
 import isFunction from "lodash/fp/isFunction";
 import cloneDeep from "lodash/fp/cloneDeep";
 
-class RecordService {
+export class InternalDBCollectionService {
   constructor(options) {
     const {
       attributes
@@ -118,4 +118,53 @@ class RecordService {
   }
 }
 
-export default RecordService;
+const emptyCollections = reduce((result, {name, attributes}) => ({
+  ...result,
+  [name]: new InternalDBCollectionService({attributes})
+}), {});
+
+class InternalDBService {
+  constructor(options) {
+    const {
+      records
+    } = assign({
+      records: [
+        // { name: "books",
+        //   attributes: [{name: "title", defaultValue: "A book title"},
+        //                {name: "score", defaultValue: 0}]}
+      ]
+    })(options || {});
+
+    this.records = records;
+    this.collections = emptyCollections(this.records);
+  }
+
+  connect() {
+    return Promise.resolve();
+  }
+
+  get(name) {
+    return new Promise((resolve, reject) => {
+      if (!this.collections[name]) {
+        const attributes = find({name})(this.records);
+        if (attributes) {
+          this.collections[name] = new InternalDBCollectionService({attributes});
+        }
+      }
+
+      if (!this.collections[name]) {
+        reject(new Error(`Collection not found with name: ${name}`));
+      } else {
+        resolve(this.collections[name]);
+      }
+    });
+  }
+
+  clear() {
+    return Promise.resolve().then(() => {
+      this.collections = emptyCollections(this.records);
+    });
+  }
+}
+
+export default InternalDBService;

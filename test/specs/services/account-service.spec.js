@@ -1,6 +1,6 @@
 import Promise from "bluebird";
 
-import CollectionService from "src/services/storage/collection.service";
+import InternalDBService from "src/services/storage/internaldb.service";
 import AccountService from "src/services/account.service";
 
 import {async} from "test/helpers/test.helper";
@@ -19,7 +19,7 @@ describe("AccountService", () => {
 
     service = new AccountService({
       joseService,
-      storage: new CollectionService({
+      storage: new InternalDBService({
         records: [{...AccountService.storageAttributes}]
       })
     });

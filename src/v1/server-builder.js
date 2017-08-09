@@ -2,7 +2,7 @@ import get from "lodash/fp/get";
 import bodyParser from "body-parser";
 
 import MongoDBService from "src/services/storage/mongodb.service";
-import CollectionService from "src/services/storage/collection.service";
+import InternalDBService from "src/services/storage/internaldb.service";
 
 import NonceService from "src/services/nonce.service";
 import JoseService from "src/services/jose.service";
@@ -51,29 +51,29 @@ export default (options) => (server) => {
     {...CertificateService.storageAttributes}
   ];
 
-  const collectionService = getDbEngine(options) === "mongodb"
+  const storageService = getDbEngine(options) === "mongodb"
     ? new MongoDBService({
       connectionUrl: getDbConnectionUrl(options),
       collectionOptions: storageAttributes
     })
-    : new CollectionService({records: storageAttributes});
+    : new InternalDBService({records: storageAttributes});
 
   const accountService = new AccountService({
     joseService,
-    storage: collectionService
+    storage: storageService
   });
 
   const challengeService = new ChallengeService({
-    storage: collectionService
+    storage: storageService
   });
 
   const authorizationService = new AuthorizationService({
     challengeService,
-    storage: collectionService
+    storage: storageService
   });
 
   const certificateService = new CertificateService({
-    storage: collectionService
+    storage: storageService
   });
 
   // TODO: Implement validation of `resource` attribute from request payload
@@ -165,7 +165,7 @@ export default (options) => (server) => {
     directoryService
   }));
 
-  return collectionService.connect().then(() => {
+  return storageService.connect().then(() => {
     return server;
   });
 };
