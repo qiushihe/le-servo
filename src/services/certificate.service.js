@@ -7,8 +7,8 @@ import {
   asn1 as ASN1
 } from "node-forge";
 
-import {parseCsr} from "src/helpers/csr.helper";
 import {
+  parseCsr,
   generateDummyRootCertificateAndKey,
   signCertificate
 } from "src/helpers/certificate.helper";

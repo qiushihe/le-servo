@@ -2,7 +2,7 @@ import uuidV4 from "uuid/v4";
 import map from "lodash/fp/map";
 import Promise from "bluebird";
 
-import {parseCsr} from "src/helpers/csr.helper";
+import {parseCsr} from "src/helpers/certificate.helper";
 
 class OrderService {
   constructor(options = {}) {

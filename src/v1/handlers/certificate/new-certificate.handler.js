@@ -4,7 +4,7 @@ import size from "lodash/fp/size";
 import {util as ForgeUtil} from "node-forge";
 
 import {getJoseVerifiedKey} from "src/helpers/request.helper";
-import {parseCsr} from "src/helpers/csr.helper";
+import {parseCsr} from "src/helpers/certificate.helper";
 
 import {
   RuntimeError,
