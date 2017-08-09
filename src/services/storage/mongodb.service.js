@@ -39,13 +39,7 @@ class MongoDBCollectionService {
   }
 
   filter(query) {
-    return this.collection.find(query).toArray((err, result) => {
-      if (err) {
-        throw err;
-      } else {
-        return recordWithId(result);
-      }
-    });
+    return this.collection.find(query).toArray().then(map(recordWithId));
   }
 
   get(id) {
