@@ -3,7 +3,7 @@ import find from "lodash/fp/find";
 import reduce from "lodash/fp/reduce";
 import assign from "lodash/fp/assign";
 
-import RecordService from "src/services/record.service";
+import RecordService from "src/services/storage/record.service";
 
 const emptyCollections = reduce((result, {name, attributes}) => ({
   ...result,

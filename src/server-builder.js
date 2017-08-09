@@ -1,10 +1,12 @@
+import get from "lodash/fp/get";
 import bodyParser from "body-parser";
 
-// import MongoDBService from "src/services/mongodb.service";
+import MongoDBService from "src/services/storage/mongodb.service";
+import CollectionService from "src/services/storage/collection.service";
+
 import NonceService from "src/services/nonce.service";
 import JoseService from "src/services/jose.service";
 import DirectoryService from "src/services/directory.service";
-import CollectionService from "src/services/collection.service";
 import AccountService from "src/services/account.service";
 import ChallengeService from "src/services/challenge.service";
 import AuthorizationService from "src/services/authorization.service";
@@ -28,28 +30,34 @@ import getAuthorization from "src/handlers/authorization/get-authorization.handl
 
 import {handleRequest} from "src/helpers/server.helper";
 
-export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
+const getOrigin = get("origin");
+const getNonceBufferSize = get("nonceBufferSize");
+const getSuppressLogging = get("suppressLogging");
+const getDbEngine = get("dbOptions.engine");
+const getDbConnectionUrl = get("dbOptions.connectionUrl");
+
+export default (options) => (server) => {
+  const origin = getOrigin(options);
+  const nonceBufferSize = getNonceBufferSize(options);
+  const suppressLogging = getSuppressLogging(options);
+
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
   const directoryService = new DirectoryService({origin});
 
-  const collectionService = new CollectionService({
-    records: [
-      {...AccountService.storageAttributes},
-      {...AuthorizationService.storageAttributes},
-      {...ChallengeService.storageAttributes},
-      {...OrderService.storageAttributes}
-    ]
-  });
+  const storageAttributes = [
+    {...AccountService.storageAttributes},
+    {...AuthorizationService.storageAttributes},
+    {...ChallengeService.storageAttributes},
+    {...OrderService.storageAttributes}
+  ];
 
-  // const collectionService = new MongoDBService({
-  //   collectionOptions: [
-  //     {...AccountService.storageAttributes},
-  //     {...AuthorizationService.storageAttributes},
-  //     {...ChallengeService.storageAttributes},
-  //     {...CertificateService.storageAttributes}
-  //   ]
-  // });
+  const collectionService = getDbEngine(options) === "mongodb"
+    ? new MongoDBService({
+      connectionUrl: getDbConnectionUrl(options),
+      collectionOptions: storageAttributes
+    })
+    : new CollectionService({records: storageAttributes});
 
   const accountService = new AccountService({
     joseService,

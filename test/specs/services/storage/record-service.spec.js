@@ -1,4 +1,4 @@
-import RecordService from "src/services/record.service";
+import RecordService from "src/services/storage/record.service";
 
 import {async} from "test/helpers/test.helper";
 
