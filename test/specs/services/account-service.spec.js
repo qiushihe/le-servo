@@ -1,6 +1,6 @@
 import Promise from "bluebird";
 
-import CollectionService from "src/services/collection.service";
+import CollectionService from "src/services/storage/collection.service";
 import AccountService from "src/services/account.service";
 
 import {async} from "test/helpers/test.helper";

@@ -7,9 +7,9 @@
     "eslint": "eslint src/** test/**",
     "build": "rm -fr build/server && babel src -q --source-maps --out-dir build/server",
     "build-test": "npm run build && rm -fr build/test && BABEL_ENV=test babel test -q --source-maps --out-dir build/test",
+    "test": "npm run eslint && npm run build-test && NODE_ENV=test nyc --reporter=html --reporter=text mocha --recursive build/test",
     "dev": "npm run build && node ./build/server/index.js",
     "v1-dev": "npm run build && node ./build/server/v1/index.js",
-    "test": "npm run eslint && npm run build-test && NODE_ENV=test nyc --reporter=html --reporter=text mocha --recursive build/test",
     "server": "node ./build/server/index.js",
     "v1-server": "node ./build/server/v1/index.js"
   },
@@ -46,5 +46,9 @@
     "node-jose": "^0.9.4",
     "on-headers": "^1.0.1",
     "uuid": "^3.0.1"
+  },
+  "optionalDependencies": {
+    "concurrently": "^3.5.0",
+    "mongodb": "^2.2.31"
   }
 }

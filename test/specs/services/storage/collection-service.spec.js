@@ -1,4 +1,4 @@
-import CollectionService from "src/services/collection.service";
+import CollectionService from "src/services/storage/collection.service";
 
 import {async} from "test/helpers/test.helper";
 
