@@ -1,20 +1,90 @@
 import Promise from "bluebird";
 import assign from "lodash/fp/assign";
 import find from "lodash/fp/find";
+import map from "lodash/fp/map";
+import reduce from "lodash/fp/reduce";
+import isEmpty from "lodash/fp/isEmpty";
+import isFunction from "lodash/fp/isFunction";
+import isUndefined from "lodash/fp/isUndefined";
+import first from "lodash/fp/first";
 import {MongoClient} from "mongodb";
 
+const recordWithId = ({_id, ...recordAttributes}) => ({...recordAttributes, id: _id});
+
 class MongoCollectionService {
-  constructor(collection, options = {}) {
+  constructor(collection, {attributes} = {}) {
     this.collection = collection;
-    this.options = options;
+    this.attributes = attributes;
+    this.attributeNames = map("name")(this.attributes);
   }
 
-  // find
-  // filter
-  // get
-  // create
-  // update
-  // remove
+  find(query) {
+    return this.collection.findOne(query).then(recordWithId);
+  }
+
+  filter(query) {
+    return this.collection.find(query).toArray((err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        return recordWithId(result);
+      }
+    });
+  }
+
+  get(id) {
+    return this.collection.findOne({_id: id}).then((record) => {
+      if (!record) {
+        throw new Error(`Record not found with id: ${id}`);
+      } else {
+        return recordWithId(record);
+      }
+    });
+  }
+
+  create(id) {
+    return this.collection.insertOne({
+      ...reduce((result, {name, defaultValue}) => ({
+        ...result,
+        [name]: isFunction(defaultValue) ? defaultValue(result) : defaultValue
+      }), {})(this.attributes),
+      _id: id
+    }).then(({ops}) => recordWithId(first(ops)));
+  }
+
+  update(id, payload) {
+    return this.collection.findOne({_id: id}).then((record) => {
+      if (!record) {
+        throw new Error(`Record not found with id: ${id}`);
+      }
+
+      const update = reduce((result, attributeName) => (
+        isUndefined(payload[attributeName])
+          ? result
+          : {...result, [attributeName]: payload[attributeName]}
+      ), {})(this.attributeNames);
+
+      if (!isEmpty(update)) {
+        return this.collection.updateOne({_id: id}, {$set: update}).then(() => {
+          return this.collection.findOne({_id: id}).then(recordWithId);
+        });
+      } else {
+        return recordWithId(record);
+      }
+    });
+  }
+
+  remove(id) {
+    return this.collection.findOne({_id: id}).then((record) => {
+      if (!record) {
+        throw new Error(`Record not found with id: ${id}`);
+      } else {
+        return this.collection.deleteOne({_id: id}).then(() => {
+          return recordWithId(record);
+        });
+      }
+    });
+  }
 }
 
 class MongoDBService {
@@ -52,9 +122,13 @@ class MongoDBService {
   get(name) {
     return Promise.resolve().then(() => {
       const collection = this.db.collection(name);
-      const options = find({name})(this.collectionOptions);
-      return new MongoCollectionService(collection, options);
+      const {attributes} = find({name})(this.collectionOptions) || {};
+      return new MongoCollectionService(collection, {attributes});
     });
+  }
+
+  clear() {
+    return this.db.dropDatabase();
   }
 }
 

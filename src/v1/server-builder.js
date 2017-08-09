@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 
-import MongoDBService from "src/services/mongodb.service";
+// import MongoDBService from "src/services/mongodb.service";
 import NonceService from "src/services/nonce.service";
 import JoseService from "src/services/jose.service";
 import DirectoryService from "src/services/directory.service";
@@ -28,18 +28,10 @@ import getCertificate from "src/v1/handlers/certificate/get-certificate.handler"
 import {handleRequest} from "src/helpers/server.helper";
 
 export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
-  const mongodbService = new MongoDBService({
-    collectionOptions: [
-      {...AccountService.storageAttributes},
-      {...AuthorizationService.storageAttributes},
-      {...ChallengeService.storageAttributes},
-      {...CertificateService.storageAttributes}
-    ]
-  });
-
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
   const directoryService = new DirectoryService({origin});
+
   const collectionService = new CollectionService({
     records: [
       {...AccountService.storageAttributes},
@@ -48,6 +40,15 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
       {...CertificateService.storageAttributes}
     ]
   });
+
+  // const collectionService = new MongoDBService({
+  //   collectionOptions: [
+  //     {...AccountService.storageAttributes},
+  //     {...AuthorizationService.storageAttributes},
+  //     {...ChallengeService.storageAttributes},
+  //     {...CertificateService.storageAttributes}
+  //   ]
+  // });
 
   const accountService = new AccountService({
     joseService,
@@ -156,7 +157,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  return mongodbService.connect().then(() => {
+  return collectionService.connect().then(() => {
     return server;
   });
 };
