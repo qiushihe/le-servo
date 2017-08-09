@@ -4,6 +4,14 @@ This is a simple Let's Encrypt Server.
 
 ### Specification
 
+Mostly based on https://tools.ietf.org/html/draft-ietf-acme-acme-02
+
+However tls-sni-02 challenge type is not supported, and instead tls-sni-01 from the previous
+version of the spec (https://tools.ietf.org/html/draft-ietf-acme-acme-01#section-7.3) is supported
+instead.
+
+### Misc. Notes
+
 https://ietf-wg-acme.github.io/acme
 
 Things not (going to be) implemented:

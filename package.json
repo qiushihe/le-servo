@@ -1,6 +1,6 @@
 {
   "name": "le-servo",
-  "version": "1.0.0-alpha1",
+  "version": "1.0.0-alpha2",
   "description": "Simple Let's Encrypt Server",
   "main": "build/server/index.js",
   "scripts": {
@@ -8,8 +8,10 @@
     "build": "rm -fr build/server && babel src -q --source-maps --out-dir build/server",
     "build-test": "npm run build && rm -fr build/test && BABEL_ENV=test babel test -q --source-maps --out-dir build/test",
     "dev": "npm run build && node ./build/server/index.js",
+    "v1-dev": "npm run build && node ./build/server/v1/index.js",
     "test": "npm run eslint && npm run build-test && NODE_ENV=test nyc --reporter=html --reporter=text mocha --recursive build/test",
-    "server": "node ./build/server/index.js"
+    "server": "node ./build/server/index.js",
+    "v1-server": "node ./build/server/v1/index.js"
   },
   "repository": "https://github.com/qiushihe/le-servo",
   "author": "Billy He",

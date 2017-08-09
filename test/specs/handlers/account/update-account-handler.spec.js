@@ -2,6 +2,7 @@ import Promise from "bluebird";
 import request from "request-promise";
 
 import updateAccount from "src/handlers/account/update-account.handler";
+import {handleRequest} from "src/helpers/server.helper";
 
 import {getServer} from "test/helpers/server.helper";
 import {async} from "test/helpers/test.helper";
@@ -42,7 +43,11 @@ describe("UpdateAccountHandler", () => {
           req.__leServoFilters = {jose: {verifiedKey: {kid: "verified-key-42", alg: "some-alg"}}};
           next();
         });
-        server.post("/accounts/:accound_id", updateAccount({accountService, directoryService}));
+
+        server.post("/accounts/:accound_id", handleRequest(updateAccount, {
+          accountService,
+          directoryService
+        }));
       }
     });
   });

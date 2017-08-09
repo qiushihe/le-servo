@@ -115,7 +115,7 @@ describe("Integration Test", () => {
         expect(authorization.identifier).to.have.property("value", "lala.com");
         expect(authorization).to.have.property("challenges");
         expect(authorization.challenges).to.not.be.empty;
-        expect(authorization.challenges[0]).to.have.property("type", "http-01");
+        expect(authorization.challenges[0]).to.have.property("type", "tls-sni-01");
         expect(authorization.challenges[0]).to.have.property("status", "pending");
         return {directory, nonce, key, account, order, authorization};
       });
@@ -125,7 +125,7 @@ describe("Integration Test", () => {
 
       return key.thumbprint("SHA-256").then((thumbprint) => {
         const payload = {
-          "type": "http-01",
+          "type": "tls-sni-01",
           "keyAuthorization": `${challenge.token}.${base64url(thumbprint)}`
         };
 
@@ -138,7 +138,7 @@ describe("Integration Test", () => {
             resolveWithFullResponse: true
           });
         }).then((res) => {
-          expect(res.body).to.have.property("status", "processing");
+          expect(res.body).to.have.property("status", "pending");
         });
       });
     })

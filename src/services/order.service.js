@@ -2,7 +2,7 @@ import uuidV4 from "uuid/v4";
 import map from "lodash/fp/map";
 import Promise from "bluebird";
 
-import {parseCsr} from "src/helpers/csr.helper";
+import {parseCsr} from "src/helpers/certificate.helper";
 
 class OrderService {
   constructor(options = {}) {
@@ -42,12 +42,14 @@ class OrderService {
         return orders.update(id, {accountId, csr, notBefore, notAfter});
       });
     }).then((order) => {
-      return parseCsr(csr).then(map((domain) => (
-        this.authorizationService.create({
-          orderId: order.id,
-          identifierValue: domain
-        })
-      )))
+      return parseCsr(csr).then(({domains}) => {
+        return map((domain) => (
+          this.authorizationService.create({
+            orderId: order.id,
+            identifierValue: domain
+          })
+        ))(domains);
+      })
       .then(Promise.all)
       .then(() => order);
     });

@@ -2,7 +2,7 @@ import isEmpty from "lodash/fp/isEmpty";
 
 import {getJson} from "src/helpers/json.helper";
 
-export default ({joseService}) => (req, _, next) => {
+export default ({joseService, v1}) => (req, _, next) => {
   const requestBody = getJson(req.body);
 
   const {
@@ -16,7 +16,7 @@ export default ({joseService}) => (req, _, next) => {
     return;
   }
 
-  joseService.verify(requestBody).then(({
+  joseService.verify(requestBody, {v1}).then(({
     payload,
     header,
     key

@@ -1,5 +1,6 @@
-import get from "lodash/fp/get";
 import base64url from "base64url";
+import get from "lodash/fp/get";
+import defer from "lodash/fp/defer";
 
 import {getJoseVerifiedKey} from "src/helpers/request.helper";
 import {
@@ -8,32 +9,34 @@ import {
   TYPE_PRECONDITION_FAILED,
   TYPE_UNPROCESSABLE_ENTITY
 } from "src/helpers/error.helper";
-import {runtimeErrorResponse} from  "src/helpers/response.helper";
+
+import {verify as verifyTLSSNI01} from "src/workers/tls-sni-01.verifier";
 
 import getAllRelated from "./get-all-related";
 
-const getRequestChallengeId = get("params.challenge_id");
-const getRequestKeyAuthorization = get("body.keyAuthorization");
-
-export default ({
+const respondToChallengeHandler = ({
   challengeService,
   authorizationService,
   orderService,
   accountService,
-  directoryService
-}) => (req, res) => {
-  const key = getJoseVerifiedKey(req);
-  const challengeId = getRequestChallengeId(req);
-
-  getAllRelated({
+  directoryService,
+  params: {
+    key,
+    challengeId,
+    challengeType,
+    challengeToken,
+    challengeKeyAuthorization
+  }
+}) => {
+  return getAllRelated({
     key,
     challengeId,
     challengeService,
     authorizationService,
     orderService,
     accountService
-  }).then(({challenge, authorization, order, account}) => {
-    if (challenge.type !== "http-01") {
+  }).then(({challenge, authorization, order}) => {
+    if (challenge.type !== "tls-sni-01") {
       throw new RuntimeError({
         message: "Challenge type unsupported",
         type: TYPE_UNPROCESSABLE_ENTITY
@@ -54,7 +57,7 @@ export default ({
       });
     }
 
-    if (order.status !== "pending") {
+    if (order && order.status !== "pending") {
       throw new RuntimeError({
         message: "Challenge.Authorization.Order status unexpected",
         type: TYPE_PRECONDITION_FAILED
@@ -62,38 +65,81 @@ export default ({
     }
 
     return key.thumbprint("SHA-256").then((thumbprint) => {
-      return {challenge, authorization, order, account, thumbprint};
+      return {challenge, authorization, thumbprint};
     });
-  }).then(({challenge, authorization, order, account, thumbprint}) => {
-    const requestKeyAuthorization = getRequestKeyAuthorization(req);
+  }).then(({challenge, authorization, thumbprint}) => {
     const expectedKeyAuthorization = `${challenge.token}.${base64url(thumbprint)}`;
 
-    if (requestKeyAuthorization !== expectedKeyAuthorization) {
+    if (challengeToken && challengeToken !== challenge.token) {
+      throw new RuntimeError({
+        message: "Challenge token mis-match",
+        type: TYPE_UNAUTHORIZED
+      });
+    }
+
+    if (challengeType && challengeType !== challenge.type) {
+      throw new RuntimeError({
+        message: "Challenge type mis-match",
+        type: TYPE_UNAUTHORIZED
+      });
+    }
+
+    if (challengeKeyAuthorization !== expectedKeyAuthorization) {
       throw new RuntimeError({
         message: "Challenge keyAuthorization mis-match",
         type: TYPE_UNAUTHORIZED
       });
     }
 
-    // TODO: Do something (spawn a worker?) to actually process the http-01 challenge
-
-    return challengeService.update(challenge.id, {
+    // Having no `order` means it's v1
+    const updatePayload = !challenge.order ? {
+      // According to https://tools.ietf.org/html/draft-ietf-acme-acme-02#section-7 the `status`
+      // attribute of a challenge can not be `processing` therefore we have to keep the `status`
+      // as `pending` and use a `processing` attribute to keep track of the challenges that are
+      // being processed.
+      processing: true,
+      status: "pending",
+      keyAuthorization: expectedKeyAuthorization
+    } : {
       status: "processing",
       keyAuthorization: expectedKeyAuthorization
-    }).then((updatedChallenge) => {
-      return {challenge: updatedChallenge, authorization, order, account};
+    };
+
+    return challengeService.update(challenge.id, updatePayload).then((updatedChallenge) => {
+      // TODO: Move this into a worker of sort.
+      defer(() => {
+        verifyTLSSNI01({
+          authorizationService,
+          challengeService,
+          challengeId: updatedChallenge.id
+        });
+      });
+
+      return {challenge: updatedChallenge, authorization};
     });
   }).then(({challenge, authorization}) => {
     const challengeUrl = directoryService.getFullUrl(`/authz/${authorization.id}/${challenge.id}`);
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Location", challengeUrl);
-    res.send(JSON.stringify({
-      type: challenge.type,
-      url: challengeUrl,
-      status: challenge.status,
-      validated: challenge.validated,
-      token: challenge.token,
-      keyAuthorization: challenge.keyAuthorization
-    })).end();
-  }).catch(runtimeErrorResponse(res));
+    return {
+      contentType: "application/json",
+      location: challengeUrl,
+      body: {
+        type: challenge.type,
+        url: challengeUrl,
+        status: challenge.status,
+        validated: challenge.validated,
+        token: challenge.token,
+        keyAuthorization: challenge.keyAuthorization
+      }
+    };
+  });
 };
+
+respondToChallengeHandler.requestParams = {
+  key: getJoseVerifiedKey,
+  challengeId: get("params.challenge_id"),
+  challengeType: get("body.type"),
+  challengeToken: get("body.token"),
+  challengeKeyAuthorization: get("body.keyAuthorization")
+};
+
+export default respondToChallengeHandler;

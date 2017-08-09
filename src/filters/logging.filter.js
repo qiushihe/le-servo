@@ -6,10 +6,24 @@ import isEmpty from "lodash/fp/isEmpty";
 const logMessage = ({
   method,
   completeUrl,
+  logHeaders,
+  headers,
+  logBody,
+  body,
   res
 }) => () => {
   const {statusCode} = res;
-  console.log(`${statusCode} ${method} ${completeUrl}`);
+  let message = `${statusCode} ${method} ${completeUrl}`;
+
+  if (logHeaders) {
+    message = `${message}\n-- Headers: ${headers}`;
+  }
+
+  if (logBody) {
+    message = `${message}\n-- Body: ${body}`;
+  }
+
+  console.log(message);
 };
 
 const getQueryString = flow([
@@ -33,14 +47,24 @@ const getCompleteUrl = (req) => {
     : `${urlWithoutQueryString}?${queryString}`
 };
 
-export default () => (req, res, next) => {
-  const {method} = req;
+export default ({logHeaders, logBody}) => (req, res, next) => {
+  const {method, headers, body} = req;
 
-  onHeaders(res, logMessage({
+  let message = {
     method,
     completeUrl: getCompleteUrl(req),
     res
-  }));
+  };
+
+  if (logHeaders) {
+    message = {...message, logHeaders, headers: JSON.stringify(headers)};
+  }
+
+  if (logBody) {
+    message = {...message, logBody, body: JSON.stringify(body)};
+  }
+
+  onHeaders(res, logMessage(message));
 
   next();
 };

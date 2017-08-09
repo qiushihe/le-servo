@@ -1,6 +1,7 @@
 import request from "request-promise";
 
 import empty from "src/handlers/empty.handler";
+import {handleRequest} from "src/helpers/server.helper";
 
 import {getServer} from "test/helpers/server.helper";
 import {async} from "test/helpers/test.helper";
@@ -12,7 +13,7 @@ describe("EmptyHandler", () => {
     server = getServer({
       parser: "json",
       setup: (server) => {
-        server.all("/lala", empty);
+        server.all("/lala", handleRequest(empty));
       }
     });
   });

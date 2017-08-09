@@ -7,23 +7,22 @@ import CollectionService from "src/services/collection.service";
 import AccountService from "src/services/account.service";
 import ChallengeService from "src/services/challenge.service";
 import AuthorizationService from "src/services/authorization.service";
-import OrderService from "src/services/order.service";
+import CertificateService from "src/services/certificate.service";
 
 import logging from "src/filters/logging.filter";
 import newNonce from "src/filters/new-nonce.filter";
 import joseVerify from "src/filters/jose-verify.filter";
 import useNonce from "src/filters/use-nonce.filter";
 
-import empty from "src/handlers/empty.handler";
 import directory from "src/handlers/directory.handler";
-import newAccount from "src/handlers/account/new-account.handler";
-import updateAccount from "src/handlers/account/update-account.handler";
-import newOrder from "src/handlers/order/new-order.handler";
-import getOrder from "src/handlers/order/get-order.handler";
-import getOrders from "src/handlers/order/get-orders.handler";
-import respondToChallenge from "src/handlers/challenge/respond-to-challenge.handler";
-import getChallenge from "src/handlers/challenge/get-challenge.handler";
-import getAuthorization from "src/handlers/authorization/get-authorization.handler";
+import newAccount from "src/v1/proxies/new-account-handler.proxy";
+import updateAccount from "src/v1/proxies/update-account-handler.proxy";
+import newAuthorization from "src/v1/proxies/new-authorization-handler.proxy";
+import getAuthorization from "src/v1/proxies/get-authorization-handler.proxy";
+import respondToChallenge from "src/v1/proxies/respond-to-challenge-handler.proxy";
+import getChallenge from "src/v1/proxies/get-challenge-handler.proxy";
+import newCertificate from "src/v1/handlers/certificate/new-certificate.handler";
+import getCertificate from "src/v1/handlers/certificate/get-certificate.handler";
 
 import {handleRequest} from "src/helpers/server.helper";
 
@@ -36,7 +35,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
       {...AccountService.storageAttributes},
       {...AuthorizationService.storageAttributes},
       {...ChallengeService.storageAttributes},
-      {...OrderService.storageAttributes}
+      {...CertificateService.storageAttributes}
     ]
   });
 
@@ -54,42 +53,58 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     storage: collectionService
   });
 
-  const orderService = new OrderService({
-    authorizationService,
+  const certificateService = new CertificateService({
     storage: collectionService
   });
 
-  directoryService.addField("new-nonce", {
-    method: "all",
-    path: "/new-nonce",
-    handler: handleRequest(empty)
-  });
+  // TODO: Implement validation of `resource` attribute from request payload
 
-  directoryService.addField("new-account", {
+  directoryService.addField("new-reg", {
     method: "post",
-    path: "/new-account",
+    path: "/new-reg",
     handler: handleRequest(newAccount, {directoryService, accountService})
   });
 
-  directoryService.addField("new-order", {
+  directoryService.addField("new-authz", {
     method: "post",
-    path: "/new-order",
-    handler: handleRequest(newOrder, {
+    path: "/new-authz",
+    handler: handleRequest(newAuthorization, {
       accountService,
-      orderService,
       authorizationService,
+      challengeService,
       directoryService
     })
   });
 
-  server.use(bodyParser.json());
+  directoryService.addField("new-cert", {
+    method: "post",
+    path: "/new-cert",
+    handler: handleRequest(newCertificate, {
+      accountService,
+      authorizationService,
+      certificateService,
+      directoryService
+    })
+  });
+
+  directoryService.addField("revoke-cert", {
+    method: "post",
+    path: "/revoke-cert",
+    handler: (req, res) => {
+      console.log("** revoke-cert", req.body);
+      res.status(204).end();
+    }
+  });
+
+  // TODO: Better parse the "application/jose+json" type
+  server.use(bodyParser.json({ type: () => true }));
 
   if (!suppressLogging) {
-    server.use(logging({}));
+    server.use(logging({logHeaders: true}));
   }
 
   server.use(newNonce({nonceService}));
-  server.use(joseVerify({joseService}));
+  server.use(joseVerify({joseService, v1: true}));
   server.use(useNonce({nonceService}));
 
   server.get("/directory", handleRequest(directory, {directoryService}));
@@ -103,23 +118,9 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     accountService
   }));
 
-  server.get("/accounts/:accound_id/orders", handleRequest(getOrders, {
-    accountService,
-    orderService,
-    directoryService
-  }));
-
-  server.get("/order/:order_id", handleRequest(getOrder, {
-    accountService,
-    orderService,
-    authorizationService,
-    directoryService
-  }));
-
   server.get("/authz/:authorization_id", handleRequest(getAuthorization, {
     challengeService,
     authorizationService,
-    orderService,
     accountService,
     directoryService
   }));
@@ -127,7 +128,6 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.post("/authz/:authorization_id/:challenge_id", handleRequest(respondToChallenge, {
     challengeService,
     authorizationService,
-    orderService,
     accountService,
     directoryService
   }));
@@ -135,8 +135,14 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
   server.get("/authz/:authorization_id/:challenge_id", handleRequest(getChallenge, {
     challengeService,
     authorizationService,
-    orderService,
     accountService,
+    directoryService
+  }));
+
+  server.get("/cert/:certificate_id", handleRequest(getCertificate, {
+    accountService,
+    authorizationService,
+    certificateService,
     directoryService
   }));
 
