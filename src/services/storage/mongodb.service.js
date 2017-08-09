@@ -11,8 +11,17 @@ import {MongoClient} from "mongodb";
 
 const recordWithId = ({_id, ...recordAttributes}) => ({...recordAttributes, id: _id});
 
-class MongoCollectionService {
-  constructor(collection, {attributes} = {}) {
+class MongoDBCollectionService {
+  constructor(collection, options) {
+    const {
+      attributes
+    } = assign({
+      attributes: [
+        // {name: "title", defaultValue: "A record title"},
+        // {name: "score", defaultValue: 0}
+      ]
+    })(options || {});
+
     this.collection = collection;
     this.attributes = attributes;
     this.attributeNames = map("name")(this.attributes);
@@ -123,7 +132,7 @@ class MongoDBService {
     return Promise.resolve().then(() => {
       const collection = this.db.collection(name);
       const {attributes} = find({name})(this.collectionOptions) || {};
-      return new MongoCollectionService(collection, {attributes});
+      return new MongoDBCollectionService(collection, {attributes});
     });
   }
 
