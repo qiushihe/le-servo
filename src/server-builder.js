@@ -1,5 +1,6 @@
 import bodyParser from "body-parser";
 
+import MongoDBService from "src/services/mongodb.service";
 import NonceService from "src/services/nonce.service";
 import JoseService from "src/services/jose.service";
 import DirectoryService from "src/services/directory.service";
@@ -28,6 +29,8 @@ import getAuthorization from "src/handlers/authorization/get-authorization.handl
 import {handleRequest} from "src/helpers/server.helper";
 
 export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
+  const mongodbService = new MongoDBService();
+
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
   const directoryService = new DirectoryService({origin});
@@ -140,5 +143,7 @@ export default ({origin, nonceBufferSize, suppressLogging}) => (server) => {
     directoryService
   }));
 
-  return server;
+  return mongodbService.connect().then(() => {
+    return server;
+  });
 };

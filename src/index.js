@@ -14,6 +14,8 @@ const buildServer = serverBuilder({
   nonceBufferSize
 });
 
-buildServer(express()).listen(port, () => {
-  console.log(`Server started on ${origin}`); // eslint-disable-line
+buildServer(express()).then((server) => {
+  server.listen(port, () => {
+    console.log(`Server started on ${origin}`); // eslint-disable-line
+  });
 });
