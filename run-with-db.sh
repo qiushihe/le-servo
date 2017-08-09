@@ -5,6 +5,7 @@ CONCURRENTLY=./node_modules/.bin/concurrently
 if [ ! -d "./mongodb-data" ]; then
   mkdir ./mongodb-data
 fi
+
 $CONCURRENTLY \
   -k \
   -p name -n mongodb,$1 \
