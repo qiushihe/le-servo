@@ -4,13 +4,14 @@ import isEmpty from "lodash/fp/isEmpty";
 import size from "lodash/fp/size";
 import {
   pki as PKI,
-  asn1 as ASN1,
-  util as ForgeUtil,
-  random as ForgeRandom
+  asn1 as ASN1
 } from "node-forge";
 
 import {parseCsr} from "src/helpers/csr.helper";
-import {generateDummyRootCertificateAndKey} from "src/helpers/certificate.helper";
+import {
+  generateDummyRootCertificateAndKey,
+  signCertificate
+} from "src/helpers/certificate.helper";
 
 class CertificateService {
   constructor(options = {}) {
@@ -25,11 +26,11 @@ class CertificateService {
       this.rootPrivateKey = PKI.privateKeyFromPem(options.rootCertKey);
     } else {
       const {
-        pem: dummyPem,
-        key: dummyKey
+        certificate: dummyCertificate,
+        privateKey: dummyPrivateKey
       } = generateDummyRootCertificateAndKey();
-      this.rootCertificate = PKI.certificateFromPem(dummyPem);
-      this.rootPrivateKey = PKI.privateKeyFromPem(dummyKey);
+      this.rootCertificate = dummyCertificate;
+      this.rootPrivateKey = dummyPrivateKey;
     }
   }
 
@@ -88,25 +89,12 @@ class CertificateService {
         }
       });
     }).then(({domain, parsedCsr}) => {
-      const cert = PKI.createCertificate();
-
-      cert.serialNumber = ForgeUtil.bytesToHex(ForgeRandom.getBytesSync(4));
-      cert.validity.notBefore = new Date();
-      cert.validity.notAfter = new Date();
-      cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
-
-      cert.setSubject([{ name: "commonName", value: domain }]);
-      cert.setIssuer(this.rootCertificate.subject.attributes);
-
-      cert.setExtensions([
-        {name: "basicConstraints", cA: false},
-        {name: "keyUsage", digitalSignature: true, keyEncipherment: true},
-        {name: "extKeyUsage", serverAuth: true},
-        {name: "subjectAltName", altNames: [{ type: 2, value: domain }]}
-      ]);
-
-      cert.publicKey = parsedCsr.publicKey;
-      cert.sign(this.rootPrivateKey);
+      const cert = signCertificate({
+        domain,
+        issuerAttributes: this.rootCertificate.subject.attributes,
+        publicKey: parsedCsr.publicKey,
+        privateKey: this.rootPrivateKey
+      });
 
       return this.update(id, {
         pem: PKI.certificateToPem(cert)

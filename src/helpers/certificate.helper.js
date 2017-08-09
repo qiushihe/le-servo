@@ -34,7 +34,36 @@ export const generateDummyRootCertificateAndKey = () => {
   cert.sign(keys.privateKey);
 
   return {
-    pem: PKI.certificateToPem(cert),
-    key: PKI.privateKeyToPem(keys.privateKey)
+    certificate: cert,
+    privateKey: keys.privateKey
   };
+};
+
+export const signCertificate = ({
+  domain,
+  issuerAttributes,
+  publicKey,
+  privateKey
+}) => {
+  const cert = PKI.createCertificate();
+
+  cert.serialNumber = ForgeUtil.bytesToHex(ForgeRandom.getBytesSync(4));
+  cert.validity.notBefore = new Date();
+  cert.validity.notAfter = new Date();
+  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
+
+  cert.setSubject([{ name: "commonName", value: domain }]);
+  cert.setIssuer(issuerAttributes);
+
+  cert.setExtensions([
+    {name: "basicConstraints", cA: false},
+    {name: "keyUsage", digitalSignature: true, keyEncipherment: true},
+    {name: "extKeyUsage", serverAuth: true},
+    {name: "subjectAltName", altNames: [{ type: 2, value: domain }]}
+  ]);
+
+  cert.publicKey = publicKey;
+  cert.sign(privateKey);
+
+  return cert;
 };
