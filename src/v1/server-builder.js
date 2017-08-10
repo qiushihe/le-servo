@@ -34,6 +34,8 @@ const getNonceBufferSize = get("nonceBufferSize");
 const getSuppressLogging = get("suppressLogging");
 const getDbEngine = get("dbOptions.engine");
 const getDbConnectionUrl = get("dbOptions.connectionUrl");
+const getRootCertPem = get("rootCertificate.pem");
+const getRootCertKey = get("rootCertificate.key");
 
 export default (options) => (server) => {
   const origin = getOrigin(options);
@@ -73,7 +75,9 @@ export default (options) => (server) => {
   });
 
   const certificateService = new CertificateService({
-    storage: storageService
+    storage: storageService,
+    rootCertPem: getRootCertPem(options),
+    rootCertKey: getRootCertKey(options)
   });
 
   // TODO: Implement validation of `resource` attribute from request payload

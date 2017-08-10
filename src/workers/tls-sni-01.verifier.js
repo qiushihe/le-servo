@@ -1,4 +1,8 @@
 // TODO: Convert this to a `worker-farm` child (https://github.com/rvagg/node-worker-farm)
+// TODO: Create a WorkerService to coordinate the dispatch of workers. This service also needs to
+//       know when it can not dispatch workers. For example when we're using the InternalDB
+//       storage service, we can not use workers and therefore the WorkerService should just
+//       invoke the worker's code in the same main process.
 
 import tls from "tls";
 import crypto from "crypto";
