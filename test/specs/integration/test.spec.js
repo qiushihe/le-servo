@@ -3,6 +3,7 @@ import {JWK} from "node-jose";
 import request from "request-promise";
 import base64url from "base64url";
 
+import WorkerService from "src/services/worker.service";
 import serverBuilder from "src/server-builder";
 
 import {getServer, getRansomPort} from "test/helpers/server.helper";
@@ -12,6 +13,8 @@ import {signWithJws as sign} from "test/helpers/jws.helper";
 import csrFixture from "test/fixtures/csr-base64url/lala.com.js";
 
 describe("Integration Test", () => {
+  let sandbox;
+
   let port;
   let server;
 
@@ -19,6 +22,10 @@ describe("Integration Test", () => {
   let clientKeyReady;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    sandbox.stub(WorkerService.prototype, "start");
+
     port = getRansomPort();
 
     server = getServer({
@@ -36,6 +43,7 @@ describe("Integration Test", () => {
 
   afterEach((done) => {
     server.close(done);
+    sandbox.restore();
   });
 
   it("should complete the basic flow", async(() => (

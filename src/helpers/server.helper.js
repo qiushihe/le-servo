@@ -14,6 +14,7 @@ export const handleRequest = (handler, options) => (req, res) => {
   }).then(({
     contentType,
     location,
+    contentLocation,
     links,
     retryAfter,
     status,
@@ -27,11 +28,15 @@ export const handleRequest = (handler, options) => (req, res) => {
       res.setHeader("Location", location);
     }
 
+    if (!isEmpty(contentLocation)) {
+      res.setHeader("Content-Location", contentLocation);
+    }
+
     if (!isEmpty(links)) {
       res.setHeader("Link", links);
     }
 
-    if (!isEmpty(retryAfter)) {
+    if (retryAfter) {
       res.setHeader("Retry-After", retryAfter);
     }
 

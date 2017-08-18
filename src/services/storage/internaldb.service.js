@@ -139,6 +139,13 @@ class InternalDBService {
     this.collections = emptyCollections(this.records);
   }
 
+  getOptions() {
+    return {
+      engine: "internaldb",
+      storageAttributes: this.records
+    };
+  }
+
   connect() {
     return Promise.resolve();
   }
