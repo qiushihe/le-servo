@@ -9,7 +9,6 @@ import {
 
 import {
   parseCsr,
-  generateDummyRootCertificateAndKey,
   signCertificate
 } from "src/helpers/certificate.helper";
 
@@ -19,19 +18,13 @@ class CertificateService {
       throw new Error("Missing storage service");
     }
 
-    this.storage = options.storage;
-
-    if (!isEmpty(options.rootCertPem) && !isEmpty(options.rootCertKey)) {
-      this.rootCertificate = PKI.certificateFromPem(options.rootCertPem);
-      this.rootPrivateKey = PKI.privateKeyFromPem(options.rootCertKey);
-    } else {
-      const {
-        certificate: dummyCertificate,
-        privateKey: dummyPrivateKey
-      } = generateDummyRootCertificateAndKey();
-      this.rootCertificate = dummyCertificate;
-      this.rootPrivateKey = dummyPrivateKey;
+    if (isEmpty(options.rootCertPem) || isEmpty(options.rootCertKey)) {
+      throw new Error("Missing root certificate and key");
     }
+
+    this.storage = options.storage;
+    this.rootCertificate = PKI.certificateFromPem(options.rootCertPem);
+    this.rootPrivateKey = PKI.privateKeyFromPem(options.rootCertKey);
   }
 
   find(query) {
@@ -97,6 +90,7 @@ class CertificateService {
       });
 
       return this.update(id, {
+        status: "valid",
         pem: PKI.certificateToPem(cert)
       });
     });

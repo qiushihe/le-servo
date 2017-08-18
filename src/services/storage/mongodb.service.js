@@ -116,6 +116,14 @@ class MongoDBService {
     this.db = null;
   }
 
+  getOptions() {
+    return {
+      engine: "mongodb",
+      connectionUrl: this.connectionUrl,
+      storageAttributes: this.collectionOptions
+    };
+  }
+
   connect() {
     return new Promise((resolve, reject) => {
       MongoClient.connect(this.connectionUrl, (err, db) => {

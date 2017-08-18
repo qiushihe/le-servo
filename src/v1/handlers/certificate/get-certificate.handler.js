@@ -41,25 +41,40 @@ const getCertificateHandler = ({
       });
     }
   }).then(({certificate, account}) => {
-    return certificateService.getDer(certificate.id).then((der) => {
-      return {certificate, account, der};
-    });
+    if (certificate.id === "root" || certificate.status === "valid") {
+      return certificateService.getDer(certificate.id).then((der) => {
+        return {certificate, account, der};
+      });
+    } else {
+      return {certificate, account};
+    }
   }).then(({certificate, account, der}) => {
     if (certificate.id === "root") {
       return {
         contentType: "application/pkix-cert",
-        location: directoryService.getFullUrl(`/cert/ca`),
+        location: directoryService.getFullUrl(`/cert/root`),
+        body: new Buffer(ForgeUtil.bytesToHex(der), "hex")
+      };
+    } else if (certificate.status === "valid") {
+      return {
+        contentType: "application/pkix-cert",
+        // TODO: Location needs to be the renewal URL for certificates under this authorization
+        location: directoryService.getFullUrl(`/cert/${certificate.id}`),
+        // TODO: Content-Locaiton needs to be the URL for this specific instance of the certificate
+        contentLocation: directoryService.getFullUrl(`/cert/${certificate.id}`),
+        links: [
+          `${directoryService.getFullUrl("/cert/root")};rel="up"`,
+          `${directoryService.getFullUrl(`/accounts/${account.id}`)};rel="author"`,
+        ],
+        // TODO: Return 201 for Location URL and 200 for Content-Location URL
+        status: 201,
         body: new Buffer(ForgeUtil.bytesToHex(der), "hex")
       };
     } else {
       return {
-        contentType: "application/pkix-cert",
         location: directoryService.getFullUrl(`/cert/${certificate.id}`),
-        links: [
-          `${directoryService.getFullUrl("/cert/ca")};rel="up"`,
-          `${directoryService.getFullUrl(`/accounts/${account.id}`)};rel="author"`,
-        ],
-        body: new Buffer(ForgeUtil.bytesToHex(der), "hex")
+        status: 202,
+        retryAfter: 5
       };
     }
   });

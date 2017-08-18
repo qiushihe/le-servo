@@ -1,4 +1,8 @@
 import express from "express";
+import isEmpty from "lodash/fp/isEmpty";
+import {pki as PKI} from "node-forge";
+
+import {generateDummyRootCertificateAndKey} from "src/helpers/certificate.helper";
 
 import serverBuilder from "./server-builder";
 
@@ -18,6 +22,21 @@ if (`${port}` === "80") {
   origin = `https://${hostName}${pathPrefix}`;
 }
 
+const rootCertificate = {
+  pem: rootCertPem,
+  key: rootCertKey
+};
+
+if (isEmpty(rootCertificate.pem) || isEmpty(rootCertificate.key)) {
+  const {
+    certificate: dummyCertificate,
+    privateKey: dummyPrivateKey
+  } = generateDummyRootCertificateAndKey();
+  rootCertificate.pem = PKI.certificateToPem(dummyCertificate);
+  rootCertificate.key = PKI.privateKeyToPem(dummyPrivateKey);
+  console.log("No root certificate and key specified; Using generated dummy certificate and key.");
+}
+
 const buildServer = serverBuilder({
   origin,
   nonceBufferSize,
@@ -25,14 +44,11 @@ const buildServer = serverBuilder({
     engine: dbEngine,
     connectionUrl: dbConnectionUrl
   },
-  rootCertificate: {
-    pem: rootCertPem,
-    key: rootCertKey
-  }
+  rootCertificate
 });
 
 buildServer(express()).then((server) => {
   server.listen(port, () => {
-    console.log(`Server started on ${origin}`); // eslint-disable-line
+    console.log(`Server started on ${origin}`);
   });
 });

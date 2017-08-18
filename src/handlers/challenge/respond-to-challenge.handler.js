@@ -1,6 +1,5 @@
 import base64url from "base64url";
 import get from "lodash/fp/get";
-import defer from "lodash/fp/defer";
 
 import {getJoseVerifiedKey} from "src/helpers/request.helper";
 import {
@@ -10,8 +9,6 @@ import {
   TYPE_UNPROCESSABLE_ENTITY
 } from "src/helpers/error.helper";
 
-import {verify as verifyTLSSNI01} from "src/workers/tls-sni-01.verifier";
-
 import getAllRelated from "./get-all-related";
 
 const respondToChallengeHandler = ({
@@ -19,6 +16,7 @@ const respondToChallengeHandler = ({
   authorizationService,
   orderService,
   accountService,
+  workerService,
   directoryService,
   params: {
     key,
@@ -106,15 +104,9 @@ const respondToChallengeHandler = ({
     };
 
     return challengeService.update(challenge.id, updatePayload).then((updatedChallenge) => {
-      // TODO: Move this into a worker of sort.
-      defer(() => {
-        verifyTLSSNI01({
-          authorizationService,
-          challengeService,
-          challengeId: updatedChallenge.id
-        });
+      workerService.start("verifyTlsSni01", {
+        challengeId: updatedChallenge.id
       });
-
       return {challenge: updatedChallenge, authorization};
     });
   }).then(({challenge, authorization}) => {

@@ -1,9 +1,8 @@
 import get from "lodash/fp/get";
 import bodyParser from "body-parser";
 
-import MongoDBService from "src/services/storage/mongodb.service";
-import InternalDBService from "src/services/storage/internaldb.service";
-
+import StorageService from "src/services/storage";
+import WorkerService from "src/services/worker.service";
 import NonceService from "src/services/nonce.service";
 import JoseService from "src/services/jose.service";
 import DirectoryService from "src/services/directory.service";
@@ -35,6 +34,8 @@ const getNonceBufferSize = get("nonceBufferSize");
 const getSuppressLogging = get("suppressLogging");
 const getDbEngine = get("dbOptions.engine");
 const getDbConnectionUrl = get("dbOptions.connectionUrl");
+const getRootCertPem = get("rootCertificate.pem");
+const getRootCertKey = get("rootCertificate.key");
 
 export default (options) => (server) => {
   const origin = getOrigin(options);
@@ -45,19 +46,32 @@ export default (options) => (server) => {
   const joseService = new JoseService();
   const directoryService = new DirectoryService({origin});
 
-  const storageAttributes = [
-    {...AccountService.storageAttributes},
-    {...AuthorizationService.storageAttributes},
-    {...ChallengeService.storageAttributes},
-    {...OrderService.storageAttributes}
-  ];
+  const storageService = StorageService({
+    engine: getDbEngine(options),
+    connectionUrl: getDbConnectionUrl(options),
+    storageAttributes: [
+      {...AccountService.storageAttributes},
+      {...AuthorizationService.storageAttributes},
+      {...ChallengeService.storageAttributes},
+      {...OrderService.storageAttributes}
+    ]
+  });
 
-  const storageService = getDbEngine(options) === "mongodb"
-    ? new MongoDBService({
-      connectionUrl: getDbConnectionUrl(options),
-      collectionOptions: storageAttributes
-    })
-    : new InternalDBService({records: storageAttributes});
+  const workerService = new WorkerService({
+    storage: storageService,
+    workers: {
+      "verifyTlsSni01": require.resolve("./workers/verifier-tls-sni-01.worker"),
+      "signCertificate": require.resolve("./workers/sign-certificate.worker")
+    },
+    workerOptions: {
+      storage: storageService,
+      storageOptions: storageService.getOptions(),
+      rootCertificate: {
+        pem: getRootCertPem(options),
+        key: getRootCertKey(options)
+      }
+    }
+  });
 
   const accountService = new AccountService({
     joseService,
@@ -148,6 +162,7 @@ export default (options) => (server) => {
     authorizationService,
     orderService,
     accountService,
+    workerService,
     directoryService
   }));
 
