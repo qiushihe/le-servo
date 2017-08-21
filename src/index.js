@@ -18,6 +18,30 @@ if (`${port}` === "80") {
   origin = `https://${hostName}${pathPrefix}`;
 }
 
+console.log(`Origin: ${origin}`);
+console.log(`Nounce buffer: ${nonceBufferSize}`);
+console.log(`DB engine: ${dbEngine}`);
+console.log(`DB connection URL: ${dbConnectionUrl}`);
+
+const rootCertificate = {
+  pem: rootCertPem,
+  key: rootCertKey
+};
+
+if (isEmpty(rootCertificate.pem) || isEmpty(rootCertificate.key)) {
+  const {
+    certificate: dummyCertificate,
+    privateKey: dummyPrivateKey
+  } = generateDummyRootCertificateAndKey();
+  rootCertificate.pem = PKI.certificateToPem(dummyCertificate);
+  rootCertificate.key = PKI.privateKeyToPem(dummyPrivateKey);
+  console.log("Root certificate: dummy");
+  console.log("Root private key: dummy");
+} else {
+  console.log("Root certificate: LE_SERVO_ROOT_CERT_PEM");
+  console.log("Root private key: LE_SERVO_ROOT_CERT_KEY");
+}
+
 const buildServer = serverBuilder({
   origin,
   nonceBufferSize,
@@ -25,10 +49,7 @@ const buildServer = serverBuilder({
     engine: dbEngine,
     connectionUrl: dbConnectionUrl
   },
-  rootCertificate: {
-    pem: rootCertPem,
-    key: rootCertKey
-  }
+  rootCertificate
 });
 
 buildServer(express()).then((server) => {

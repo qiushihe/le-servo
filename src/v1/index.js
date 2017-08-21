@@ -22,6 +22,11 @@ if (`${port}` === "80") {
   origin = `https://${hostName}${pathPrefix}`;
 }
 
+console.log(`Origin: ${origin}`);
+console.log(`Nounce buffer: ${nonceBufferSize}`);
+console.log(`DB engine: ${dbEngine}`);
+console.log(`DB connection URL: ${dbConnectionUrl}`);
+
 const rootCertificate = {
   pem: rootCertPem,
   key: rootCertKey
@@ -34,7 +39,11 @@ if (isEmpty(rootCertificate.pem) || isEmpty(rootCertificate.key)) {
   } = generateDummyRootCertificateAndKey();
   rootCertificate.pem = PKI.certificateToPem(dummyCertificate);
   rootCertificate.key = PKI.privateKeyToPem(dummyPrivateKey);
-  console.log("No root certificate and key specified; Using generated dummy certificate and key.");
+  console.log("Root certificate: dummy");
+  console.log("Root private key: dummy");
+} else {
+  console.log("Root certificate: LE_SERVO_ROOT_CERT_PEM");
+  console.log("Root private key: LE_SERVO_ROOT_CERT_KEY");
 }
 
 const buildServer = serverBuilder({
