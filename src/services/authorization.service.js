@@ -51,9 +51,9 @@ class AuthorizationService {
     });
   }
 
-  update(id, {status}) {
+  update(id, {status, csr}) {
     return this.storage.get("authorizations").then((authorizations) => {
-      return authorizations.update(id, {status});
+      return authorizations.update(id, {status, csr});
     });
   }
 }
@@ -66,7 +66,9 @@ AuthorizationService.storageAttributes = {
     {name: "identifierType", defaultValue: "dns"},
     {name: "identifierValue", defaultValue: null},
     {name: "status", defaultValue: "pending"},
-    {name: "expires", defaultValue: null}
+    {name: "expires", defaultValue: null},
+    // Used by v1 only because v1 doesn't have "order"
+    {name: "csr", defaultValue: null}
   ]
 };
 

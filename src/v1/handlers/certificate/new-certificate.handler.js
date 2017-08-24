@@ -54,9 +54,14 @@ const newCertificateHandler = ({
       return {account, domain, authorization};
     });
   }).then(({account, domain, authorization}) => {
-    return certificateService.create({
-      authorizationId: authorization.id,
+    return authorizationService.update(authorization.id, {
       csr
+    }).then((updatedAuthorization) => {
+      return {account, domain, authorization: updatedAuthorization};
+    });
+  }).then(({account, domain, authorization}) => {
+    return certificateService.create({
+      authorizationId: authorization.id
     }).then((certificate) => {
       return {account, domain, authorization, certificate};
     });

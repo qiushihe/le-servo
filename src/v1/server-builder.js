@@ -87,6 +87,7 @@ export default (options) => (server) => {
   });
 
   const certificateService = new CertificateService({
+    authorizationService,
     storage: storageService,
     rootCertPem: getRootCertPem(options),
     rootCertKey: getRootCertKey(options)
