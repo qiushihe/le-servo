@@ -68,7 +68,7 @@ const newCertificateHandler = ({
   }).then(({certificate}) => {
     workerService.start("signCertificate", {certificateId: certificate.id});
     return {
-      location: directoryService.getFullUrl(`/cert/${certificate.id}`),
+      location: directoryService.getFullUrl(`/cert/accepted/${certificate.id}`),
       status: 202,
       retryAfter: 5
     };
