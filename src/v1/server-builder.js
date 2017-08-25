@@ -24,7 +24,9 @@ import getAuthorization from "src/v1/proxies/get-authorization-handler.proxy";
 import respondToChallenge from "src/v1/proxies/respond-to-challenge-handler.proxy";
 import getChallenge from "src/v1/proxies/get-challenge-handler.proxy";
 import newCertificate from "src/v1/handlers/certificate/new-certificate.handler";
+import getAcceptedCertificate from "src/v1/handlers/certificate/get-accepted-certificate.handler";
 import getCertificate from "src/v1/handlers/certificate/get-certificate.handler";
+import renewCertificate from "src/v1/handlers/certificate/renew-certificate.handler";
 
 import {handleRequest} from "src/helpers/server.helper";
 
@@ -87,6 +89,7 @@ export default (options) => (server) => {
   });
 
   const certificateService = new CertificateService({
+    authorizationService,
     storage: storageService,
     rootCertPem: getRootCertPem(options),
     rootCertKey: getRootCertKey(options)
@@ -176,10 +179,24 @@ export default (options) => (server) => {
     directoryService
   }));
 
+  server.get("/cert/accepted/:certificate_id", handleRequest(getAcceptedCertificate, {
+    accountService,
+    authorizationService,
+    certificateService,
+    directoryService
+  }));
+
   server.get("/cert/:certificate_id", handleRequest(getCertificate, {
     accountService,
     authorizationService,
     certificateService,
+    directoryService
+  }));
+
+  server.get("/cert/renew/:authorization_id", handleRequest(renewCertificate, {
+    authorizationService,
+    certificateService,
+    workerService,
     directoryService
   }));
 

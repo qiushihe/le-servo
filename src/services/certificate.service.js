@@ -22,9 +22,14 @@ class CertificateService {
       throw new Error("Missing root certificate and key");
     }
 
+    if (!options.authorizationService) {
+      throw new Error("Missing authorization service");
+    }
+
     this.storage = options.storage;
     this.rootCertificate = PKI.certificateFromPem(options.rootCertPem);
     this.rootPrivateKey = PKI.privateKeyFromPem(options.rootCertKey);
+    this.authorizationService = options.authorizationService;
   }
 
   find(query) {
@@ -58,22 +63,24 @@ class CertificateService {
     });
   }
 
-  create({orderId, status, pem, authorizationId, csr}) {
+  create({orderId, status, pem, authorizationId}) {
     return this.storage.get("certificates").then((certificates) => {
       return certificates.create(uuidV4()).then(({id}) => {
-        return certificates.update(id, {orderId, status, pem, authorizationId, csr});
+        return certificates.update(id, {orderId, status, pem, authorizationId});
       });
     });
   }
 
-  update(id, {orderId, status, pem, authorizationId, csr}) {
+  update(id, {orderId, status, pem, authorizationId}) {
     return this.storage.get("certificates").then((certificates) => {
-      return certificates.update(id, {orderId, status, pem, authorizationId, csr});
+      return certificates.update(id, {orderId, status, pem, authorizationId});
     });
   }
 
   sign(id) {
-    return this.get(id).then(({csr}) => {
+    return this.get(id).then(({authorizationId}) => {
+      return this.authorizationService.get(authorizationId);
+    }).then(({csr}) => {
       return parseCsr(csr).then(({csr: parsedCsr, domains = []}) => {
         if (isEmpty(domains) || size(domains) > 1) {
           throw new Error("CSR must contain exactly 1 domain");
@@ -104,8 +111,7 @@ CertificateService.storageAttributes = {
     {name: "status", defaultValue: "pending"},
     {name: "pem", defaultValue: null},
     // Only v1 uses these because v1 doesn't have `order`
-    {name: "authorizationId", defaultValue: null},
-    {name: "csr", defaultValue: null}
+    {name: "authorizationId", defaultValue: null}
   ]
 };
 

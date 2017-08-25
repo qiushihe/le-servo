@@ -54,16 +54,21 @@ const newCertificateHandler = ({
       return {account, domain, authorization};
     });
   }).then(({account, domain, authorization}) => {
-    return certificateService.create({
-      authorizationId: authorization.id,
+    return authorizationService.update(authorization.id, {
       csr
+    }).then((updatedAuthorization) => {
+      return {account, domain, authorization: updatedAuthorization};
+    });
+  }).then(({account, domain, authorization}) => {
+    return certificateService.create({
+      authorizationId: authorization.id
     }).then((certificate) => {
       return {account, domain, authorization, certificate};
     });
   }).then(({certificate}) => {
     workerService.start("signCertificate", {certificateId: certificate.id});
     return {
-      location: directoryService.getFullUrl(`/cert/${certificate.id}`),
+      location: directoryService.getFullUrl(`/cert/accepted/${certificate.id}`),
       status: 202,
       retryAfter: 5
     };
