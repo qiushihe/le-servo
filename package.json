@@ -1,6 +1,6 @@
 {
   "name": "le-servo",
-  "version": "1.0.0-alpha4",
+  "version": "1.0.0-alpha5",
   "description": "Simple Let's Encrypt Server",
   "main": "build/server/index.js",
   "scripts": {
