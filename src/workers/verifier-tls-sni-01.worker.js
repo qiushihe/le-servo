@@ -55,7 +55,7 @@ module.exports = ({storage, storageOptions, challengeId}, done) => {
       const expectedSAN = `DNS:${zName}`;
 
       const updatePayload = peerSAN === expectedSAN
-        ? {processing: false, status: "valid"}
+        ? {processing: false, status: "valid", validated: new Date()}
         : {processing: false, status: "invalid"};
 
       return challengeService.update(challengeId, updatePayload);
