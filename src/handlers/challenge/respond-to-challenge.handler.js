@@ -34,7 +34,7 @@ const respondToChallengeHandler = ({
     orderService,
     accountService
   }).then(({challenge, authorization, order}) => {
-    if (challenge.type !== "tls-sni-01") {
+    if (challenge.type !== "http-01" && challenge.type !== "tls-sni-01") {
       throw new RuntimeError({
         message: "Challenge type unsupported",
         type: TYPE_UNPROCESSABLE_ENTITY
@@ -104,9 +104,11 @@ const respondToChallengeHandler = ({
     };
 
     return challengeService.update(challenge.id, updatePayload).then((updatedChallenge) => {
-      workerService.start("verifyTlsSni01", {
-        challengeId: updatedChallenge.id
-      });
+      if (updatedChallenge.type === "tls-sni-01") {
+        workerService.start("verifyTlsSni01", {
+          challengeId: updatedChallenge.id
+        });
+      }
       return {challenge: updatedChallenge, authorization};
     });
   }).then(({challenge, authorization}) => {
