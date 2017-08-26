@@ -16,6 +16,7 @@ import newNonce from "src/filters/new-nonce.filter";
 import joseVerify from "src/filters/jose-verify.filter";
 import useNonce from "src/filters/use-nonce.filter";
 
+import empty from "src/handlers/empty.handler";
 import directory from "src/handlers/directory.handler";
 import newAccount from "src/v1/proxies/new-account-handler.proxy";
 import updateAccount from "src/v1/proxies/update-account-handler.proxy";
@@ -145,6 +146,8 @@ export default (options) => (server) => {
   server.use(newNonce({nonceService}));
   server.use(joseVerify({joseService, v1: true}));
   server.use(useNonce({nonceService}));
+
+  server.head("*", handleRequest(empty));
 
   server.get("/directory", handleRequest(directory, {directoryService}));
 
