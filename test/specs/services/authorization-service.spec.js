@@ -92,12 +92,17 @@ describe("AuthorizationService", () => {
         expect(authorization).to.have.property("id");
         expect(authorization).to.have.property("orderId", "order666");
         expect(authorization).to.have.property("identifierValue", "lala.com");
-        expect(service.challengeService.create).to.have.been.calledOnce
-          .and.to.have.been.calledWith(sinon.match({
-            authorizationId: authorization.id,
-            type: sinon.match.string,
-            token: sinon.match.string
-          }));
+        expect(service.challengeService.create).to.have.been.calledTwice;
+        expect(service.challengeService.create.getCall(0)).to.have.been.calledWith(sinon.match({
+          authorizationId: authorization.id,
+          type: "http-01",
+          token: sinon.match.string
+        }));
+        expect(service.challengeService.create.getCall(1)).to.have.been.calledWith(sinon.match({
+          authorizationId: authorization.id,
+          type: "tls-sni-01",
+          token: sinon.match.string
+        }));
       })
     )));
   });
