@@ -19,5 +19,6 @@ export const STATUS_MAP = {
 export const runtimeErrorResponse = (res) => (err = "") => {
   const {message, type} = err;
   const errorMessage = message || err || "Unknown Error";
+  console.error(err);
   res.status(STATUS_MAP[type] || 500).send(errorMessage).end();
 };

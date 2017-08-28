@@ -108,6 +108,10 @@ const respondToChallengeHandler = ({
         workerService.start("verifyTlsSni01", {
           challengeId: updatedChallenge.id
         });
+      } else if (updatedChallenge.type === "http-01") {
+        workerService.start("verifyHttp01", {
+          challengeId: updatedChallenge.id
+        });
       }
       return {challenge: updatedChallenge, authorization};
     });

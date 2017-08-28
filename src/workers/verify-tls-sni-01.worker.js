@@ -60,8 +60,8 @@ module.exports = ({storage, storageOptions, challengeId}, done) => {
 
       return challengeService.update(challengeId, updatePayload);
     }).then((updatedChallenge) => {
-      // TODO: Technically we should only mark authorization as valid if the combination requirement
-      //       is satisfied.
+      // TODO: Technically we should only mark authorization as valid if the
+      //       combination requirement is satisfied.
       if (updatedChallenge.status === "valid") {
         return authorizationService.update(updatedChallenge.authorizationId, {
           status: "valid"
