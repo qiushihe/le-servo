@@ -25,7 +25,7 @@ const proxiedGetChallengeHandler = (request) => {
         ...(challenge.processing ? {status: 202} : {}),
         links: [
           ...(links || []),
-          `${directoryService.getFullUrl(`/authz/${authorizationId}`)};rel="up"`
+          `<${directoryService.getFullUrl(`/authz/${authorizationId}`)}>;rel="up"`
         ],
         body: {
           ...restResponseBody,
