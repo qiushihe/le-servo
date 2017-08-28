@@ -60,7 +60,8 @@ export default (options) => (server) => {
   const workerService = new WorkerService({
     storage: storageService,
     workers: {
-      "verifyTlsSni01": require.resolve("./workers/verifier-tls-sni-01.worker"),
+      "verifyTlsSni01": require.resolve("./workers/verify-tls-sni-01.worker"),
+      "verifyHttp01": require.resolve("./workers/verify-http-01.worker"),
       "signCertificate": require.resolve("./workers/sign-certificate.worker")
     },
     workerOptions: {

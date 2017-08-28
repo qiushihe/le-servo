@@ -11,6 +11,7 @@ class JoseService {
   verify(jws, {v1 = false} = {}) {
     return Promise.resolve().then(() => {
       const {
+        header,
         protected: protectedHeader,
         payload,
         signature
@@ -26,11 +27,14 @@ class JoseService {
         kid,
         nonce,
         url
-      } = flow([
-        joseUtil.base64url.decode,
-        joseUtil.utf8.encode,
-        JSON.parse
-      ])(protectedHeader);
+      } = {
+        ...header,
+        ...flow([
+          joseUtil.base64url.decode,
+          joseUtil.utf8.encode,
+          JSON.parse
+        ])(protectedHeader)
+      };
 
       if (isEmpty(kid) && isEmpty(jwk)) {
         throw new Error("Invalid header: Missing either kid or jwk");

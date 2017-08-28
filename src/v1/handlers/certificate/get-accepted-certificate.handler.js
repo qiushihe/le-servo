@@ -32,8 +32,8 @@ const getAcceptedCertificateHandler = ({
         location: directoryService.getFullUrl(`/cert/renew/${authorization.id}`),
         contentLocation: directoryService.getFullUrl(`/cert/${certificate.id}`),
         links: [
-          `${directoryService.getFullUrl("/cert/root")};rel="up"`,
-          `${directoryService.getFullUrl(`/accounts/${account.id}`)};rel="author"`,
+          `<${directoryService.getFullUrl("/cert/root")}>;rel="up"`,
+          `<${directoryService.getFullUrl(`/accounts/${account.id}`)}>;rel="author"`,
         ],
         status: 201,
         body: new Buffer(ForgeUtil.bytesToHex(der), "hex")

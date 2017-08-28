@@ -17,7 +17,7 @@ const proxiedNewAuthorization = (request) => {
 
     return {
       ...respond,
-      links: [`${directoryService.getFullUrl("/new-cert")};rel="next"`],
+      links: [`<${directoryService.getFullUrl("/new-cert")}>;rel="next"`],
       body: {
         ...restResponseBody,
         challenges: map(({url, ...restChallenge}) => {

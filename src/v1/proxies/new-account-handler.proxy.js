@@ -29,7 +29,7 @@ const proxiedNewAccount = (request) => {
 
     return {
       ...respond,
-      links: [`${directoryService.getFullUrl("/new-authz")};rel="next"`],
+      links: [`<${directoryService.getFullUrl("/new-authz")}>;rel="next"`],
       status: 201,
       body
     };

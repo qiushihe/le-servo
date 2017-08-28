@@ -122,13 +122,15 @@ describe("Integration Test", () => {
         expect(authorization.identifier).to.have.property("type", "dns");
         expect(authorization.identifier).to.have.property("value", "lala.com");
         expect(authorization).to.have.property("challenges");
-        expect(authorization.challenges).to.not.be.empty;
-        expect(authorization.challenges[0]).to.have.property("type", "tls-sni-01");
+        expect(authorization.challenges).to.have.length(2);
+        expect(authorization.challenges[0]).to.have.property("type", "http-01");
         expect(authorization.challenges[0]).to.have.property("status", "pending");
+        expect(authorization.challenges[1]).to.have.property("type", "tls-sni-01");
+        expect(authorization.challenges[1]).to.have.property("status", "pending");
         return {directory, nonce, key, account, order, authorization};
       });
     }).then(({directory, nonce, key, account, order, authorization}) => {
-      const challenge = authorization.challenges[0];
+      const challenge = authorization.challenges[1];
       const header = {nonce, url: challenge.url};
 
       return key.thumbprint("SHA-256").then((thumbprint) => {

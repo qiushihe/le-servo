@@ -55,13 +55,13 @@ module.exports = ({storage, storageOptions, challengeId}, done) => {
       const expectedSAN = `DNS:${zName}`;
 
       const updatePayload = peerSAN === expectedSAN
-        ? {processing: false, status: "valid"}
+        ? {processing: false, status: "valid", validated: new Date()}
         : {processing: false, status: "invalid"};
 
       return challengeService.update(challengeId, updatePayload);
     }).then((updatedChallenge) => {
-      // TODO: Technically we should only mark authorization as valid if the combination requirement
-      //       is satisfied.
+      // TODO: Technically we should only mark authorization as valid if the
+      //       combination requirement is satisfied.
       if (updatedChallenge.status === "valid") {
         return authorizationService.update(updatedChallenge.authorizationId, {
           status: "valid"

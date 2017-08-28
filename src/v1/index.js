@@ -10,6 +10,8 @@ const hostName = process.env.LE_SERVO_HOST_NAME || "localhost";
 const pathPrefix = process.env.LE_SERVO_PATH_PREFIX || "";
 const port = process.env.LE_SERVO_PORT || 3000;
 const nonceBufferSize = process.env.LE_SERVO_NONCE_BUFFER_SIZE || 1024;
+const suppressLogging = process.env.LE_SERVO_SUPRESS_LOGGING === "true";
+const deferredCertGen = process.env.LE_SERVO_DEFERRED_CERT_GEN === "true";
 const dbEngine = process.env.LE_SERVO_DB_ENGINE || "internaldb";
 const dbConnectionUrl = process.env.LE_SERVO_DB_CONNECTION_URL || "";
 const rootCertPem = process.env.LE_SERVO_ROOT_CERT_PEM || "";
@@ -24,6 +26,8 @@ if (`${port}` === "80") {
 
 console.log(`Origin: ${origin}`);
 console.log(`Nounce buffer: ${nonceBufferSize}`);
+console.log(`Supress logging: ${suppressLogging}`);
+console.log(`Deferred certificate creation: ${deferredCertGen}`);
 console.log(`DB engine: ${dbEngine}`);
 console.log(`DB connection URL: ${dbConnectionUrl}`);
 
@@ -49,6 +53,8 @@ if (isEmpty(rootCertificate.pem) || isEmpty(rootCertificate.key)) {
 const buildServer = serverBuilder({
   origin,
   nonceBufferSize,
+  suppressLogging,
+  deferredCertGen,
   dbOptions: {
     engine: dbEngine,
     connectionUrl: dbConnectionUrl

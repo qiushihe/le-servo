@@ -7,6 +7,7 @@ const reduce = convertReduce({cap: false});
 
 export const handleRequest = (handler, options) => (req, res) => {
   handler({
+    headers: req.headers,
     params: reduce((result, getter, name) => {
       return {...result, [name]: getter(req)};
     }, {})(handler.requestParams || {}),

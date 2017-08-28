@@ -33,14 +33,19 @@ const getAuthorizationHandler = ({
           value: authorization.identifierValue
         },
         challenges: map((challenge) => {
-          return {
+          const challengeJson = {
             type: challenge.type,
             url: directoryService.getFullUrl(`/authz/${authorization.id}/${challenge.id}`),
             status: challenge.status,
-            validated: challenge.validated,
             token: challenge.token,
             keyAuthorization: challenge.keyAuthorization
           };
+
+          if (challenge.status === "valid") {
+            challengeJson.validated = challenge.validated;
+          }
+
+          return challengeJson;
         })(challenges)
       }
     };

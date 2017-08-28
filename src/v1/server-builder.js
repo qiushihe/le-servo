@@ -16,6 +16,7 @@ import newNonce from "src/filters/new-nonce.filter";
 import joseVerify from "src/filters/jose-verify.filter";
 import useNonce from "src/filters/use-nonce.filter";
 
+import empty from "src/handlers/empty.handler";
 import directory from "src/handlers/directory.handler";
 import newAccount from "src/v1/proxies/new-account-handler.proxy";
 import updateAccount from "src/v1/proxies/update-account-handler.proxy";
@@ -38,10 +39,19 @@ const getDbConnectionUrl = get("dbOptions.connectionUrl");
 const getRootCertPem = get("rootCertificate.pem");
 const getRootCertKey = get("rootCertificate.key");
 
+// Due to the unique way Certbot is implemented (read: "not according to specs"; See this
+// discussion for detail: https://github.com/certbot/certbot/issues/4389) it does not
+// support the deferred certificate creation flow (i.e. responding with 202 Accepted).
+// So here we accept this option so that deferred certificated creation flow can be optionally
+// enabled within environments where there would not be any ACEM clients that doesn't support
+// this feature (i.e. in a closed network where all clients are Traefik).
+const getDeferredCertGen = get("deferredCertGen");
+
 export default (options) => (server) => {
   const origin = getOrigin(options);
   const nonceBufferSize = getNonceBufferSize(options);
   const suppressLogging = getSuppressLogging(options);
+  const deferredCertGen = getDeferredCertGen(options);
 
   const nonceService = new NonceService({bufferSize: nonceBufferSize});
   const joseService = new JoseService();
@@ -61,7 +71,8 @@ export default (options) => (server) => {
   const workerService = new WorkerService({
     storage: storageService,
     workers: {
-      "verifyTlsSni01": require.resolve("../workers/verifier-tls-sni-01.worker"),
+      "verifyTlsSni01": require.resolve("../workers/verify-tls-sni-01.worker"),
+      "verifyHttp01": require.resolve("../workers/verify-http-01.worker"),
       "signCertificate": require.resolve("../workers/sign-certificate.worker")
     },
     workerOptions: {
@@ -122,7 +133,8 @@ export default (options) => (server) => {
       authorizationService,
       certificateService,
       workerService,
-      directoryService
+      directoryService,
+      deferredCertGen
     })
   });
 
@@ -145,6 +157,8 @@ export default (options) => (server) => {
   server.use(newNonce({nonceService}));
   server.use(joseVerify({joseService, v1: true}));
   server.use(useNonce({nonceService}));
+
+  server.head("*", handleRequest(empty));
 
   server.get("/directory", handleRequest(directory, {directoryService}));
 
@@ -194,10 +208,12 @@ export default (options) => (server) => {
   }));
 
   server.get("/cert/renew/:authorization_id", handleRequest(renewCertificate, {
+    accountService,
     authorizationService,
     certificateService,
     workerService,
-    directoryService
+    directoryService,
+    deferredCertGen
   }));
 
   return storageService.connect().then(() => {

@@ -1,5 +1,8 @@
 import uuidV4 from "uuid/v4";
 import Promise from "bluebird";
+import moment from "moment";
+
+// TODO: Implement worker to update status of expired authorizations
 
 class AuthorizationService {
   constructor(options = {}) {
@@ -44,6 +47,11 @@ class AuthorizationService {
       return Promise.all([
         this.challengeService.create({
           authorizationId: authorization.id,
+          type: "http-01",
+          token: uuidV4().replace(/-/g, "")
+        }),
+        this.challengeService.create({
+          authorizationId: authorization.id,
           type: "tls-sni-01",
           token: uuidV4().replace(/-/g, "")
         })
@@ -66,7 +74,7 @@ AuthorizationService.storageAttributes = {
     {name: "identifierType", defaultValue: "dns"},
     {name: "identifierValue", defaultValue: null},
     {name: "status", defaultValue: "pending"},
-    {name: "expires", defaultValue: null},
+    {name: "expires", defaultValue: () => moment().add(1, "day").toDate()},
     // Used by v1 only because v1 doesn't have "order"
     {name: "csr", defaultValue: null}
   ]

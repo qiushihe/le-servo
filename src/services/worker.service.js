@@ -1,3 +1,4 @@
+import Promise from "bluebird";
 import WorkerFarm from "worker-farm";
 import isEmpty from "lodash/fp/isEmpty";
 import defer from "lodash/fp/defer";
@@ -28,7 +29,7 @@ class WorkerService {
         return {...result, [name]: WorkerFarm(path)};
       } else {
         return {...result, [name]: (...restArgs) => {
-          return defer(require(path).default, ...restArgs);
+          return defer(require(path), ...restArgs);
         }};
       }
     }, {})(options.workers);
@@ -41,16 +42,20 @@ class WorkerService {
       ...restWorkerOptions
     } = this.workerOptions;
 
-    this.workerFarms[name]({
-      ...(this.hasExternalAccess ? {storageOptions} : {storage}),
-      ...restWorkerOptions,
-      ...options
-    }, (err, output) => {
-      if (err) {
-        console.log("Worker error", err);
-      } else {
-        console.log("Worker done", output);
-      }
+    return new Promise((resolve, reject) => {
+      this.workerFarms[name]({
+        ...(this.hasExternalAccess ? {storageOptions} : {storage}),
+        ...restWorkerOptions,
+        ...options
+      }, (err, output) => {
+        if (err) {
+          console.error(err);
+          reject(err);
+        } else {
+          console.log(output);
+          resolve(output);
+        }
+      });
     });
   }
 }

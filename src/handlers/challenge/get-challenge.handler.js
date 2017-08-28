@@ -20,17 +20,23 @@ const getChallengeHandler = ({
     accountService
   }).then(({challenge, authorization}) => {
     const challengeUrl = directoryService.getFullUrl(`/authz/${authorization.id}/${challenge.id}`);
+
+    const challengeJson = {
+      type: challenge.type,
+      url: challengeUrl,
+      status: challenge.status,
+      token: challenge.token,
+      keyAuthorization: challenge.keyAuthorization
+    };
+
+    if (challenge.status === "valid") {
+      challengeJson.validated = challenge.validated;
+    }
+
     return {
       contentType: "application/json",
       location: challengeUrl,
-      body: {
-        type: challenge.type,
-        url: challengeUrl,
-        status: challenge.status,
-        validated: challenge.validated,
-        token: challenge.token,
-        keyAuthorization: challenge.keyAuthorization
-      }
+      body: challengeJson
     };
   })
 };
